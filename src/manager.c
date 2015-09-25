@@ -12,41 +12,56 @@ mm_manager_t* mm_manager_create()
 
 void mm_manager_destroy(mm_manager_t* manager)
 {
+  while (manager->process_count --> 0)
+    mm_process_destroy(manager->processes[manager->process_count]);
+  FREE(manager->processes);
   FREE(manager);
 }
 
-mm_manager_t* mm_manager_read_file(const char* fname, unsigned* count)
+// TODO transform this into a simple wrapper
+//      around a parser that takes a string.
+mm_manager_t* mm_manager_parse_file(const char* fname)
 {
-  /* char buf[MM_MAX_INPUT]; */
-  /* FILE* fp = NULL; */
-  /* unsigned lines = 0; */
-  /* int ch; */
+  char buf[MM_MAX_INPUT];
+  FILE* fp = NULL;
+  unsigned lines = 0;
+  char* curr = NULL, * end = NULL;
+  int ch;
+  mm_process_t** processes = NULL;
   mm_manager_t* manager = mm_manager_create();
 
-  /* PASSERT((fp = fopen(fname, "r")), "Error while opening file %s", fname); */
+  PASSERT((fp = fopen(fname, "r")), "Error while opening file %s", fname);
 
-  /* while ((ch = fgetc(fp)) != EOF) { */
-  /*   if (ch == '\n') */
-  /*     lines++; */
-  /* } */
+  while ((ch = fgetc(fp)) != EOF) {
+    if (ch == '\n')
+      lines++;
+  }
 
-  /* fseek(fp, 0, SEEK_SET); */
-  /* traces = malloc(sizeof(*traces) * lines); */
-  /* ASSERT(traces, "mem allocation error"); */
-  /* lines = 0; */
+  fseek(fp, 0, SEEK_SET);
+  processes = calloc(lines, sizeof(*processes));
+  ASSERT(processes, "mem allocation error");
+  lines = 0;
 
-  /* // perform a fgets for the first line and parse it */
-  /* fgets .. . */ 
+  // first line
+  fgets(buf, MM_MAX_INPUT, fp);
 
-  /* // then parse the using process' parser */
+  curr = buf;
+  manager->physical = strtoul(curr, &end, 10);
+  ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);
+  curr = end;
 
-  /* while (fgets(buf, MAX_INPUT, fp)) */
-  /*   traces[lines++] = sm_parse_trace(buf); */
+  manager->virtual = strtoul(curr, &end, 10);
+  ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);
+  curr = end;
 
-  /* ASSERT(~fclose(fp), "Error while closing file %s: %s", fname, */
-  /*        strerror(errno)); */
-  /* *entries = lines; */
+  // processes' lines
+  while (fgets(buf, MM_MAX_INPUT, fp))
+    processes[lines++] = mm_process_parse(buf);
+  manager->processes = processes;
+
+  ASSERT(~fclose(fp), "Error while closing file %s: %s", fname,
+         strerror(errno));
+  manager->process_count = lines;
 
   return manager;
 }
-
