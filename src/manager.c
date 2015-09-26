@@ -12,7 +12,7 @@ mm_manager_t* mm_manager_create()
 
 void mm_manager_destroy(mm_manager_t* manager)
 {
-  while (manager->process_count --> 0)
+  while (manager->process_count-- > 0)
     mm_process_destroy(manager->processes[manager->process_count]);
   FREE(manager->processes);
   FREE(manager);

@@ -18,4 +18,6 @@ mm_manager_t* mm_manager_create();
 void mm_manager_destroy(mm_manager_t*);
 mm_manager_t* mm_manager_parse_file(const char* fname);
 
+void mm_manager_create_memory(mm_manager_t* manager);
+
 #endif
