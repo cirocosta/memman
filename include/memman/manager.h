@@ -8,11 +8,14 @@ typedef struct mm_manager_t {
   unsigned physical;
   unsigned virtual;
 
+  mm_algorithms_e free_mem_alg;
+  mm_algorithms_e page_subst_alg;
+
   mm_process_t** processes;
   unsigned process_count;
 } mm_manager_t;
 
-static mm_manager_t zeroed_manager_t = { 0 };
+static const mm_manager_t zeroed_manager_t = { 0 };
 
 mm_manager_t* mm_manager_create();
 void mm_manager_destroy(mm_manager_t*);

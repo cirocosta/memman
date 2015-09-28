@@ -1,6 +1,6 @@
 #include "memman/memory.h"
 
-mm_memory_t* mm_memory_create(unsigned size, mm_memory_type type)
+mm_memory_t* mm_memory_create(unsigned size, mm_memory_type_e type)
 {
   mm_memory_t* mem = malloc(sizeof(*mem));
   PASSERT(mem, MM_ERR_MALLOC);

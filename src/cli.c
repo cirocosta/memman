@@ -2,7 +2,7 @@
 
 int mm_cli_command_carrega(const char* arg)
 {
-  LOGERR("executing carrega");
+
   return 0;
 }
 

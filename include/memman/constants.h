@@ -5,15 +5,27 @@
 #define MM_MAX_ACCESS 64
 #define MM_MAX_INPUT 512
 
-typedef enum mm_segment_type {
+typedef enum mm_segment_type_e {
   MM_SEG_FREE = 1,
   MM_SEG_PROCESS,
-} mm_segment_type;
+} mm_segment_type_e;
 
-typedef enum mm_memory_type {
+typedef enum mm_memory_type_e {
   MM_MEM_PHYSICAL = 1,
   MM_MEM_VIRTUAL,
-} mm_memory_type;
+} mm_memory_type_e;
+
+typedef enum mm_algorithms_e {
+  MM_ALG_FREE_FF = 1,
+  MM_ALG_FREE_NF,
+  MM_ALG_FREE_QF,
+} mm_algorithms_e;
+
+  /* MM_ALG_PSUBST_FIFO, */
+  /* MM_ALG_PSUBST_LRUP, */
+  /* MM_ALG_PSUBST_NRUP, */
+  /* MM_ALG_PSUBST_SCP */
+/* } mm_algorithms_e; */
 
 #define MM_ERR_MALLOC "Couldn't allocate memory"
 #define MM_ERR_MALFORMED_TRACE                                                 \
