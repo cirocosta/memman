@@ -39,7 +39,7 @@ void mm_dllist_destroy(mm_dllist_t* list)
 
   while (list) {
     next = list->next;
-    free(list);
+    FREE(list);
     list = next;
   }
 }

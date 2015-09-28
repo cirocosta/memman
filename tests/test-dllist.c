@@ -64,7 +64,7 @@ void test3()
     mm_dllist_t* elem3 = mm_dllist_insert_after(elem2, NULL);
 
     mm_dllist_remove(elem2);
-    FREE(elem2);
+    mm_dllist_destroy(elem2);
 
     ASSERT(list->prev == NULL, "");
     ASSERT(list->next == elem1, "");
