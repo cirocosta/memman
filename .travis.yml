@@ -12,9 +12,11 @@ addons:
       - clang-3.6
       - m4
       - valgrind
+env:
+  - BUILD=Debug
+  - BUILD=Release
 
 before_script:
-  - export BUILD=Debug
   - if [ "$CXX" = "clang" ]; then export CC="clang-3.6"; fi
   - make 
 
