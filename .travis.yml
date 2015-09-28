@@ -1,0 +1,27 @@
+sudo: false
+language: c
+compiler:
+  - clang
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
+    packages:
+      - gcc-4.9
+      - clang-3.6
+      - m4
+      - valgrind
+
+before_script:
+  - export BUILD=Debug
+  - if [ "$CXX" = "clang" ]; then export CC="clang-3.6"; fi
+  - make 
+
+script:
+  - make test
+  - for test in tests/*.out; do valgrind --leak-check=yes --error-exitcode=1 ./$test; done
+
+notifications:
+  email: false
+

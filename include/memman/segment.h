@@ -10,12 +10,10 @@
 
 #include "memman/common.h"
 
-typedef struct mm_seg_t {
-  mm_seg_type type;
+typedef struct mm_segment_t {
+  mm_segment_type type;
   unsigned start;
   unsigned length;
-
-  struct mm_seg_t* next;
-} mm_seg_t;
+} mm_segment_t;
 
 #endif

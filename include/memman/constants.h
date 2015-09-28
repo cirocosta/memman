@@ -5,10 +5,10 @@
 #define MM_MAX_ACCESS 64
 #define MM_MAX_INPUT 512
 
-typedef enum mm_seg_type {
+typedef enum mm_segment_type {
   MM_SEG_FREE = 1,
   MM_SEG_PROCESS,
-} mm_seg_type;
+} mm_segment_type;
 
 typedef enum mm_memory_type {
   MM_MEM_PHYSICAL = 1,
