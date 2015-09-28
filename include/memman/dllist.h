@@ -35,15 +35,13 @@ mm_dllist_t* mm_dllist_create(void* data)
 
 void mm_dllist_destroy(mm_dllist_t* list)
 {
-  mm_dllist_t* initial = list;
   mm_dllist_t* next;
 
-  while ((next = list->next)) {
-    free(next);
+  while (list) {
+    next = list->next;
+    free(list);
     list = next;
   }
-
-  free(initial);
 }
 
 /* void mm_dllist_search(mm_dllist_t* list, void* k); */
@@ -59,7 +57,17 @@ mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, void* data)
   return b;
 }
 
+void mm_dllist_remove(mm_dllist_t* list)
+{
+  mm_dllist_t* prev = list->prev;
+  mm_dllist_t* next = list->next;
 
-/* void mm_dllist_remove(mm_dllist_t* list, void* k); */
+  if (next)
+    list->next->prev = prev;
+  if (prev)
+    list->prev->next = next;
+
+  list->next = list->prev = NULL;
+}
 
 #endif
