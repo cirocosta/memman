@@ -15,6 +15,7 @@ typedef struct mm_process_t {
   char pname[MM_MAX_NAME];
   mm_process_access_t access[MM_MAX_ACCESS];
   unsigned access_count;
+  int8_t pid;
 } mm_process_t;
 
 static mm_process_t zeroed_process_t = { 0 };
