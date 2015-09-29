@@ -8,7 +8,7 @@
 /**
  * INVARIANTS:
  *  - segment represents a process ==> seg->process != NULL
- *  - segment represets a role ==> seg->process == NULL
+ *  - segment represets a hole ==> seg->process == NULL
  */
 
 typedef struct mm_segment_t {
@@ -17,17 +17,7 @@ typedef struct mm_segment_t {
   mm_process_t* process;
 } mm_segment_t;
 
-mm_segment_t* mm_segment_create(unsigned start, unsigned length)
-{
-  mm_segment_t* seg = malloc(sizeof(*seg));
-  PASSERT(seg, MM_ERR_MALLOC);
-
-  seg->start = start;
-  seg->length = length;
-
-  return seg;
-}
-
-void mm_segment_destroy(mm_segment_t* segment) { FREE(segment); }
+mm_segment_t* mm_segment_create(unsigned start, unsigned length);
+void mm_segment_destroy(mm_segment_t* segment);
 
 #endif

@@ -38,7 +38,7 @@ $(LIB): $(LIB_OBJS)
 
 .PHONY: clean test 
 
-test: $(LIB) $(SOURCES) $(TESTS) $(HEADERS)
+test: $(LIB) $(TESTS) $(HEADERS)
 	@$(foreach test_exec,$(TESTS),./$(test_exec);)
 
 %.out: %.c

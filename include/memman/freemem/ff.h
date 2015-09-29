@@ -5,7 +5,7 @@
 #include "memman/segment.h"
 #include "memman/dllist.h"
 
-mm_segment_t* mm_freemem_ff(mm_dllist_t* freelist, unsigned size)
+inline static mm_segment_t* mm_freemem_ff(mm_dllist_t* freelist, unsigned size)
 {
   mm_dllist_t* list = freelist;
   mm_segment_t* seg;
