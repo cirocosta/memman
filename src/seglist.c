@@ -64,15 +64,13 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
 {
   // |PROC|FREE...| ==> |FREE....|
   unsigned pos = process->start + process->length;
-  mm_dllist_t* fl = _search_start(list->holes, pos);
-  mm_segment_t* seg = (mm_segment_t*)fl->data;
+  mm_dllist_t* pl = _search_start(list->processes, process->start);
+  mm_segment_t* seg = (mm_segment_t*)_search_start(list->holes, pos)->data;
 
   seg->start -= process->length;
   seg->length += process->length;
 
-  mm_dllist_remove(fl);
-
-  (void)fl;
+  mm_dllist_remove(pl);
 }
 
 mm_segment_t* mm_seglist_add_process(mm_seglist_t* list, mm_process_t* process)
