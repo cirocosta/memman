@@ -30,6 +30,8 @@ mm_seglist_t* mm_seglist_create(unsigned size, mm_algorithms_e algorithm)
 void mm_seglist_destroy(mm_seglist_t* list)
 {
   // TODO what about the segments?
+  //      they'll get destroyed by the now specialized
+  //      list.
   mm_dllist_destroy(list->holes);
   mm_dllist_destroy(list->processes);
   FREE(list);
@@ -174,7 +176,7 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
     _free_nxp(list, NULL, pl, proc_right);
   }
 
-  // do the job
+// do the job
 
 #if 0
   if (free_left && free_right) { // [F][X][F]

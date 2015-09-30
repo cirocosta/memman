@@ -1,9 +1,5 @@
 #include "memman/dllist.h"
 
-struct data_t {
-  int id;
-} data_t;
-
 void test1()
 {
   {

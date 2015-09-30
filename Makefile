@@ -36,10 +36,13 @@ $(LIB): $(LIB_OBJS)
 	$(CC) $(CFLAGS) $(DEFS) $(INCLUDES) -c -o $@ $<
 
 
-.PHONY: clean test 
+.PHONY: clean test valgrind
 
 test: $(LIB) $(TESTS) $(HEADERS)
 	@$(foreach test_exec,$(TESTS),./$(test_exec);)
+
+valgrind: $(TESTS)
+	@$(foreach test_exec,$(TESTS),valgrind --error-exitcode=1 ./$(test_exec) 2>&1 ;)
 
 %.out: %.c
 	$(CC) $(CFLAGS) $< $(DEFS) $(INCLUDES) $(LIBS) -o $@ $(LIB) 

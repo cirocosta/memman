@@ -18,6 +18,11 @@ void mm_dllist_destroy(mm_dllist_t* list)
 
   while (list) {
     next = list->next;
+    
+    // FIXME create a test for this
+    if (list->segment)
+      mm_segment_destroy(list->segment);
+
     FREE(list);
     list = next;
   }

@@ -10,30 +10,19 @@ int fexists(const char* fname)
   return 0;
 }
 
-int fsize(char* file)
+int fsize(FILE* file)
 {
   int size;
-  FILE* fh;
+  int last_pos;
 
-  PASSERT((fh = fopen(file, "rb")), "fsize");
+  PASSERT(~fseek(file, 0, SEEK_SET), "");
+  last_pos = ftell(file);
+  PASSERT(~fseek(file, 0, SEEK_END), "");
+  size = ftell(file);
+  PASSERT(~fseek(file, last_pos, SEEK_SET), "");
 
-  if (fseek(fh, 0, SEEK_END)) {
-    fclose(fh);
-    return -1;
-  }
-
-  size = ftell(fh);
-  fclose(fh);
   return size;
 }
-
-void SET_UP(mm_memory_t* mem)
-{
-  if (fexists(mem->fname))
-    fdelete(mem->fname);
-}
-
-void TEAR_DOWN(mm_memory_t* mem) { fdelete(mem->fname); }
 
 void test1()
 {
@@ -41,16 +30,14 @@ void test1()
   unsigned actual_bytes = 0;
   mm_memory_t* mem = mm_memory_create(bytes, MM_MEM_PHYSICAL);
 
-  SET_UP(mem);
+  if (fexists(mem->fname))
+    fdelete(mem->fname);
 
   mm_memory_init_file(mem);
-  mm_memory_destroy(mem);
-
-  actual_bytes = fsize(mem->fname);
-
+  actual_bytes = fsize(mem->file);
   ASSERT(actual_bytes == bytes, "%d != %u", actual_bytes, bytes);
 
-  /* TEAR_DOWN(mem); */
+  mm_memory_destroy(mem);
 }
 
 int main(int argc, char* argv[])

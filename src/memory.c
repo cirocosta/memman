@@ -48,4 +48,5 @@ void mm_memory_init_file(mm_memory_t* mem)
 void mm_memory_assign(mm_memory_t* mem, unsigned base, unsigned length,
                       int value)
 {
+  // TODO
 }
