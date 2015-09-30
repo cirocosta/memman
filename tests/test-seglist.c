@@ -133,10 +133,10 @@ void test5()
 int main(int argc, char* argv[])
 {
   TEST(test1, "No processes");
-  /* TEST(test2, "First-Firt: first process assignment"); */
-  /* TEST(test3, "First-Firt: second process assignment"); */
-  /* TEST(test4, "Freeing single-process"); */
-  /* TEST(test5, "Freeing The first process in a 2proc scenario"); */
+  TEST(test2, "First-Firt: first process assignment");
+  TEST(test3, "First-Firt: second process assignment");
+  TEST(test4, "Freeing single-process");
+  TEST(test5, "Freeing The first process in a 2proc scenario");
 
   return 0;
 }
