@@ -40,7 +40,7 @@ static mm_dllist_t* _search_b4_start(mm_dllist_t* list, mm_segment_t* seg)
   while (list) {
     if (!list->next)
       return list;
-    if (((mm_segment_t*)list->next->data)->start >= seg->start)
+    if ((list->next->segment)->start >= seg->start)
       return list;
     list = list->next;
   }
@@ -51,10 +51,10 @@ static mm_dllist_t* _search_b4_start(mm_dllist_t* list, mm_segment_t* seg)
 static mm_dllist_t* _search_start(mm_dllist_t* list, unsigned pos)
 {
   do {
-    if (!list->data)
+    if (!list->segment)
       continue;
 
-    if (((mm_segment_t*)list->data)->start == pos)
+    if ((list->segment)->start == pos)
       return list;
   } while ((list = list->next));
 
@@ -66,10 +66,10 @@ static mm_dllist_t* _search_end(mm_dllist_t* list, unsigned pos)
   mm_segment_t* tmp;
 
   do {
-    if (!list->data)
+    if (!list->segment)
       continue;
 
-    tmp = (mm_segment_t*)list->data;
+    tmp = list->segment;
 
     if (tmp->start + tmp->length == pos)
       return list;
@@ -107,7 +107,7 @@ static void _free_fxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_nxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  mm_segment_t* seg_x = (mm_segment_t*)x->data;
+  mm_segment_t* seg_x = x->segment;
 
   mm_dllist_remove(x);
   mm_process_destroy(seg_x->process);
@@ -120,8 +120,8 @@ static void _free_nxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_nxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  mm_segment_t* seg_rhs = (mm_segment_t*)rhs->data;
-  mm_segment_t* seg_x = (mm_segment_t*)x->data;
+  mm_segment_t* seg_rhs = rhs->segment;
+  mm_segment_t* seg_x = x->segment;
 
   seg_rhs->start -= seg_x->length;
   seg_rhs->length += seg_x->length;
@@ -142,7 +142,7 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
   mm_dllist_t* pl = _search_start(list->processes, process->start);
 
   // has a process at its right
-  if (pl->next && (((mm_segment_t*)pl->next->data)->start == right_pos)) {
+  if (pl->next && ((pl->next->segment)->start == right_pos)) {
     proc_right = pl->next;
   } else {
     free_right = _search_start(list->holes, right_pos);
@@ -150,7 +150,7 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
 
   // has process at left
   if (pl->prev) {
-    tmp_seg = (mm_segment_t*)pl->prev->data;
+    tmp_seg = pl->prev->segment;
 
     if (tmp_seg && tmp_seg->start + tmp_seg->length == process->start)
       proc_left = pl->prev;
@@ -179,11 +179,11 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
 #if 0
   if (free_left && free_right) { // [F][X][F]
     // FIXME TEST THIS CASE
-    ((mm_segment_t*)free_right->data)->start -= process->length;
-    ((mm_segment_t*)free_right->data)->length += process->length;
+    (free_right->segment)->start -= process->length;
+    (free_right->segment)->length += process->length;
 
-    ((mm_segment_t*)free_left->data)->length +=
-        ((mm_segment_t*)free_right->data)->length;
+    (free_left->segment)->length +=
+        (free_right->segment)->length;
     mm_dllist_remove(free_right);
     mm_dllist_remove(pl);
 

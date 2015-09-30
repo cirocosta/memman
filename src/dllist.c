@@ -1,13 +1,13 @@
 #include "memman/dllist.h"
 
-mm_dllist_t* mm_dllist_create(void* data)
+mm_dllist_t* mm_dllist_create(mm_segment_t* data)
 {
   mm_dllist_t* list = malloc(sizeof(*list));
   PASSERT(list, MM_ERR_MALLOC);
 
   list->next = NULL;
   list->prev = NULL;
-  list->data = data;
+  list->segment = data;
 
   return list;
 }
@@ -31,10 +31,9 @@ void mm_dllist_append(mm_dllist_t* a, mm_dllist_t* b)
 }
 
 // FIXME deprecated
-mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, void* data)
+mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, mm_segment_t* data)
 {
   mm_dllist_t* b = mm_dllist_create(data);
-
   mm_dllist_append(a,b);
 
   return b;

@@ -3,11 +3,12 @@
 
 #include "memman/common.h"
 #include "memman/dllist.h"
-#include "memman/segment.h"
 
 #include "memman/freemem/ff.h"
 #include "memman/freemem/nf.h"
 #include "memman/freemem/qf.h"
+
+// TODO rename this. It's more like a "segments_manager"
 
 struct mm_seglist_t;
 typedef mm_segment_t* (*mm_seglist_func)(mm_dllist_t* freelist, unsigned size);

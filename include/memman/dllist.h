@@ -2,6 +2,7 @@
 #define MEMMAN__DLLIST_H
 
 #include "memman/common.h"
+#include "memman/segment.h"
 
 /**
  * SETUP:
@@ -19,13 +20,13 @@
 typedef struct mm_dllist_t {
   struct mm_dllist_t* next;
   struct mm_dllist_t* prev;
-  void* data;
+  mm_segment_t* segment;
 } mm_dllist_t;
 
-mm_dllist_t* mm_dllist_create(void* data);
+mm_dllist_t* mm_dllist_create(mm_segment_t* data);
 void mm_dllist_destroy(mm_dllist_t* list);
 
-mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, void* data);
+mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, mm_segment_t* data);
 void mm_dllist_remove(mm_dllist_t* list);
 void mm_dllist_append(mm_dllist_t* a, mm_dllist_t* b);
 

@@ -11,10 +11,10 @@ inline static mm_segment_t* mm_freemem_ff(mm_dllist_t* freelist, unsigned size)
   mm_segment_t* seg;
 
   do {
-    seg = (mm_segment_t*)list->data;
+    seg = (mm_segment_t*)list->segment;
     if (seg->length >= size)
       return seg;
-  } while ((list = list->next) && list->data);
+  } while ((list = list->next) && list->segment);
 
   return NULL; // no space found.
 }
