@@ -18,11 +18,8 @@ void mm_dllist_destroy(mm_dllist_t* list)
 
   while (list) {
     next = list->next;
-    
-    // FIXME create a test for this
     if (list->segment)
       mm_segment_destroy(list->segment);
-
     FREE(list);
     list = next;
   }
@@ -30,6 +27,8 @@ void mm_dllist_destroy(mm_dllist_t* list)
 
 void mm_dllist_append(mm_dllist_t* a, mm_dllist_t* b)
 {
+  if (a->next)
+    a->next->prev = b;
   b->prev = a;
   b->next = a->next;
   a->next = b;
@@ -39,7 +38,7 @@ void mm_dllist_append(mm_dllist_t* a, mm_dllist_t* b)
 mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, mm_segment_t* data)
 {
   mm_dllist_t* b = mm_dllist_create(data);
-  mm_dllist_append(a,b);
+  mm_dllist_append(a, b);
 
   return b;
 }
@@ -50,9 +49,20 @@ void mm_dllist_remove(mm_dllist_t* list)
   mm_dllist_t* next = list->next;
 
   if (next)
-    list->next->prev = prev;
+    next->prev = prev;
   if (prev)
-    list->prev->next = next;
+    prev->next = next;
 
-  list->next = list->prev = NULL;
+  list->next = NULL;
+  list->prev = NULL;
+}
+
+void mm_dllist_show(mm_dllist_t* list)
+{
+  while (list) {
+    mm_segment_show(list->segment);
+    list = list->next;
+  }
+
+  fprintf(stderr, "NIL\n");
 }

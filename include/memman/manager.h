@@ -13,6 +13,10 @@ typedef struct mm_manager_t {
 
   mm_process_t** processes;
   unsigned process_count;
+  // mm_seglist_t*  ...
+  
+  // TODO remove mananger's ownership 
+  //      of processes
 } mm_manager_t;
 
 static const mm_manager_t zeroed_manager_t = { 0 };

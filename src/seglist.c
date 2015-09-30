@@ -29,9 +29,6 @@ mm_seglist_t* mm_seglist_create(unsigned size, mm_algorithms_e algorithm)
 
 void mm_seglist_destroy(mm_seglist_t* list)
 {
-  // TODO what about the segments?
-  //      they'll get destroyed by the now specialized
-  //      list.
   mm_dllist_destroy(list->holes);
   mm_dllist_destroy(list->processes);
   FREE(list);
@@ -103,38 +100,41 @@ static void _free_fxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_fxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
+  lhs->segment->length += rhs->segment->length;
+  lhs->segment->length += x->segment->length;
+
+  mm_dllist_remove(x);
+  mm_dllist_destroy(x);
+
+  rhs->prev->next = rhs->next;
+  mm_dllist_destroy(rhs); // err
 }
 
 // nxp ==> f
 static void _free_nxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  mm_segment_t* seg_x = x->segment;
+  mm_dllist_remove(x);  // NIL <- X -> NIL
+  mm_process_destroy(x->segment->process);
+  x->segment->process = NULL;
 
-  mm_dllist_remove(x);
-  mm_process_destroy(seg_x->process);
-  seg_x->process = NULL;
-
-  mm_dllist_append(sl->holes, x);
+  mm_dllist_append(sl->holes, x); 
 }
 
 // nxf ==> f
 static void _free_nxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  mm_segment_t* seg_rhs = rhs->segment;
-  mm_segment_t* seg_x = x->segment;
 
-  seg_rhs->start -= seg_x->length;
-  seg_rhs->length += seg_x->length;
+  rhs->segment->start -= x->segment->length;
+  rhs->segment->length += x->segment->length;
 
   mm_dllist_remove(x);
-  mm_segment_destroy(seg_x);
+  mm_dllist_destroy(x);
 }
 
 void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
 {
-  mm_segment_t* tmp_seg = NULL;
   mm_dllist_t* proc_left = NULL;
   mm_dllist_t* proc_right = NULL;
   mm_dllist_t* free_left = NULL;
@@ -142,23 +142,21 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
 
   unsigned right_pos = process->start + process->length;
   mm_dllist_t* pl = _search_start(list->processes, process->start);
+  ASSERT(pl, "pl must be in memory");
 
   // has a process at its right
   if (pl->next && ((pl->next->segment)->start == right_pos)) {
     proc_right = pl->next;
-  } else {
+  } else { // may have a free at right
     free_right = _search_start(list->holes, right_pos);
   }
 
   // has process at left
-  if (pl->prev) {
-    tmp_seg = pl->prev->segment;
-
-    if (tmp_seg && tmp_seg->start + tmp_seg->length == process->start)
-      proc_left = pl->prev;
-  }
-
-  if (!proc_left) {
+  if (pl->prev && pl->prev->segment &&
+      (pl->prev->segment->start + pl->prev->segment->length ==
+       process->start)) {
+    proc_left = pl->prev;
+  } else { // may have a free at left
     free_left = _search_end(list->holes, process->start);
   }
 
@@ -175,23 +173,6 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
   } else if (!(free_left || proc_left) && proc_right) {
     _free_nxp(list, NULL, pl, proc_right);
   }
-
-// do the job
-
-#if 0
-  if (free_left && free_right) { // [F][X][F]
-    // FIXME TEST THIS CASE
-    (free_right->segment)->start -= process->length;
-    (free_right->segment)->length += process->length;
-
-    (free_left->segment)->length +=
-        (free_right->segment)->length;
-    mm_dllist_remove(free_right);
-    mm_dllist_remove(pl);
-
-    return;
-  }
-#endif
 }
 
 mm_segment_t* mm_seglist_add_process(mm_seglist_t* list, mm_process_t* process)

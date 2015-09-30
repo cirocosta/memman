@@ -75,22 +75,15 @@ void test4()
   mm_seglist_t* list = mm_seglist_create(10, MM_ALG_FREE_FF);
   mm_segment_t* proc_seg;
 
-  // initializing a process that takes 5 bytes
   mm_process_t* process = mm_process_create();
   process->b = 5;
-  // PROC S->nil
-  // FREE S->|0,10|->nil
 
   proc_seg = mm_seglist_add_process(list, process);
-  // PROC S->|0,5|->nil
-  // FREE S->|5,5|->nil
-  // OVERALL  [P,0,5][F,5,5]
-  //        =====>
-  // OVERALL  [F,0,10]
 
+  // OVERALL  [][P,0,5][F,5,5]
+  //          ==free(proc)==> (nxf)
+  // OVERALL  [][F,0,10]
   mm_seglist_free_process(list, proc_seg);
-  // PROC S->nil
-  // FREE S->|0,10|->nil
 
   ASSERT((list->holes->next->segment)->start == 0, "");
   ASSERT((list->holes->next->segment)->length == 10, "");
@@ -106,16 +99,17 @@ void test5()
   mm_process_t* process1 = mm_process_create();
   mm_process_t* process2 = mm_process_create();
   mm_segment_t* proc1_seg;
+  mm_segment_t* proc2_seg;
 
   process1->b = 3;
   process2->b = 3;
 
   proc1_seg = mm_seglist_add_process(list, process1);
-  mm_seglist_add_process(list, process2);
+  proc2_seg = mm_seglist_add_process(list, process2);
 
   //                 p1    p2
   // OVERALL    [][P,0,3][P,3,3][F,6,6]
-  //                ===free(p1)==>
+  //                ===free(p1)==> (nxp)
   // OVERALL    [][F,0,3][P,3,3][F,6,6]
   mm_seglist_free_process(list, proc1_seg);
 
@@ -123,9 +117,27 @@ void test5()
   ASSERT((list->holes->next->segment)->length == 3, "");
   ASSERT((list->holes->next->next->segment)->start == 6, "");
   ASSERT((list->holes->next->next->segment)->length == 6, "");
+  ASSERT(list->holes->next->next->prev == list->holes->next,
+         "Must be in correct order");
 
   ASSERT((list->processes->next->segment)->start == 3, "");
   ASSERT((list->processes->next->segment)->length == 3, "");
+
+  //                        p2
+  // OVERALL    [][F,0,3][P,3,3][F,6,6]
+  //                ===free(p2)==>  (fxf)
+  // OVERALL    [][F,0,12]
+
+  ASSERT(list->holes->next != NULL, "");
+  ASSERT(list->holes->next->next != NULL, "");
+
+  mm_seglist_free_process(list, proc2_seg);
+
+  ASSERT(list->holes->next != NULL, "");
+
+  ASSERT((list->holes->next->segment)->start == 0, "");
+  ASSERT((list->holes->next->segment)->length == 12, "");
+  ASSERT(list->holes->next->next == NULL, "");
 
   mm_seglist_destroy(list);
 }

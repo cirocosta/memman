@@ -29,5 +29,6 @@ void mm_dllist_destroy(mm_dllist_t* list);
 mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, mm_segment_t* data);
 void mm_dllist_remove(mm_dllist_t* list);
 void mm_dllist_append(mm_dllist_t* a, mm_dllist_t* b);
+void mm_dllist_show(mm_dllist_t* list);
 
 #endif

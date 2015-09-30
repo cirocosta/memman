@@ -19,5 +19,6 @@ typedef struct mm_segment_t {
 
 mm_segment_t* mm_segment_create(unsigned start, unsigned length);
 void mm_segment_destroy(mm_segment_t* segment);
+void mm_segment_show(mm_segment_t* seg);
 
 #endif
