@@ -23,13 +23,19 @@ void mm_dllist_destroy(mm_dllist_t* list)
   }
 }
 
+void mm_dllist_append(mm_dllist_t* a, mm_dllist_t* b)
+{
+  b->prev = a;
+  b->next = a->next;
+  a->next = b;
+}
+
+// FIXME deprecated
 mm_dllist_t* mm_dllist_insert_after(mm_dllist_t* a, void* data)
 {
   mm_dllist_t* b = mm_dllist_create(data);
 
-  b->prev = a;
-  b->next = a->next;
-  a->next = b;
+  mm_dllist_append(a,b);
 
   return b;
 }
