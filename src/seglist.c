@@ -90,17 +90,10 @@ static mm_dllist_t* _search_end(mm_dllist_t* list, unsigned pos)
 static void _free_pxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  // before:
-  //  proc : p1 p2 p3
-  //  free :           free
-  
   mm_dllist_remove(x); // won't delete, recycle
-  // proc :  p1 p3
   mm_process_destroy(x->segment->process);
   x->segment->process = NULL;
 
-  //  proc : p1      p3
-  //  free :   free     free
   mm_dllist_append(_search_b4_start(sl->holes, x->segment->start + 1), x);
 }
 
@@ -108,6 +101,11 @@ static void _free_pxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_pxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
+  rhs->segment->length += x->segment->length;
+  rhs->segment->start -= x->segment->length;
+
+  mm_dllist_remove(x);
+  mm_dllist_destroy(x);
 }
 
 // fxp ==> fp
@@ -126,7 +124,7 @@ static void _free_fxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
   mm_dllist_remove(x);
   mm_dllist_destroy(x);
 
-  rhs->prev->next = rhs->next;
+  mm_dllist_remove(rhs);
   mm_dllist_destroy(rhs); // err
 }
 

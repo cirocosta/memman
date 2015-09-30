@@ -184,6 +184,36 @@ void test6()
   mm_seglist_destroy(list);
 }
 
+void test7()
+{
+  mm_seglist_t* list = mm_seglist_create(12, MM_ALG_FREE_FF);
+
+  mm_segment_t* proc1_seg;
+  mm_segment_t* proc2_seg;
+
+  mm_process_t* process1 = mm_process_create();
+  mm_process_t* process2 = mm_process_create();
+
+  process1->b = 3;
+  process2->b = 3;
+
+  proc1_seg = mm_seglist_add_process(list, process1);
+  proc2_seg = mm_seglist_add_process(list, process2);
+
+  //                p1    p2
+  // OVERALL  [][P,0,3][P,3,3][F,6,6]    6 bytes allocated
+  //            ====free(P2)====> (pxf)
+  // OVERALL  [][P,0,3][F,3,8]           3 bytes allocated
+  mm_seglist_free_process(list, proc2_seg);
+
+  ASSERT((list->processes->next->segment)->start == 0, "");
+  ASSERT((list->processes->next->segment)->length == 3, "");
+
+  ASSERT((list->holes->next->segment)->start == 3, "");
+  ASSERT((list->holes->next->segment)->length == 9, "");
+
+  mm_seglist_destroy(list);
+}
 int main(int argc, char* argv[])
 {
   TEST(test1, "No processes");
@@ -192,6 +222,7 @@ int main(int argc, char* argv[])
   TEST(test4, "Freeing single-process");
   TEST(test5, "Freeing The first process in a 2proc scenario");
   TEST(test6, "Freeing the centered process in between other two");
+  TEST(test7, "Freeing pxf");
 
   return 0;
 }
