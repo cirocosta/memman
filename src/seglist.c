@@ -34,12 +34,16 @@ void mm_seglist_destroy(mm_seglist_t* list)
   FREE(list);
 }
 
-static mm_dllist_t* _search_b4_start(mm_dllist_t* list, mm_segment_t* seg)
+/**
+ * Searches for the list member whose position is
+ * less than our segment's start
+ */
+static mm_dllist_t* _search_b4_start(mm_dllist_t* list, unsigned pos)
 {
   while (list) {
     if (!list->next)
       return list;
-    if ((list->next->segment)->start >= seg->start)
+    if ((list->next->segment)->start >= pos)
       return list;
     list = list->next;
   }
@@ -47,6 +51,10 @@ static mm_dllist_t* _search_b4_start(mm_dllist_t* list, mm_segment_t* seg)
   return list;
 }
 
+/**
+ * Search for the exact list member whose
+ * start position equals pos
+ */
 static mm_dllist_t* _search_start(mm_dllist_t* list, unsigned pos)
 {
   do {
@@ -82,6 +90,18 @@ static mm_dllist_t* _search_end(mm_dllist_t* list, unsigned pos)
 static void _free_pxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
+  // before:
+  //  proc : p1 p2 p3
+  //  free :           free
+  
+  mm_dllist_remove(x); // won't delete, recycle
+  // proc :  p1 p3
+  mm_process_destroy(x->segment->process);
+  x->segment->process = NULL;
+
+  //  proc : p1      p3
+  //  free :   free     free
+  mm_dllist_append(_search_b4_start(sl->holes, x->segment->start + 1), x);
 }
 
 // pxf ==> pf
@@ -114,11 +134,11 @@ static void _free_fxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_nxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  mm_dllist_remove(x);  // NIL <- X -> NIL
+  mm_dllist_remove(x); // NIL <- X -> NIL
   mm_process_destroy(x->segment->process);
   x->segment->process = NULL;
 
-  mm_dllist_append(sl->holes, x); 
+  mm_dllist_append(sl->holes, x);
 }
 
 // nxf ==> f
@@ -181,7 +201,7 @@ mm_segment_t* mm_seglist_add_process(mm_seglist_t* list, mm_process_t* process)
   mm_segment_t* process_seg = mm_segment_create(free_seg->start, process->b);
   process_seg->process = process;
 
-  mm_dllist_t* proc_b4 = _search_b4_start(list->processes, process_seg);
+  mm_dllist_t* proc_b4 = _search_b4_start(list->processes, process_seg->start);
   mm_dllist_insert_after(proc_b4, process_seg);
 
   free_seg->length -= process->b;
