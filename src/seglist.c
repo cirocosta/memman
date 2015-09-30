@@ -112,6 +112,10 @@ static void _free_pxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_fxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
+  lhs->segment->length += x->segment->length;  
+
+  mm_dllist_remove(x);
+  mm_dllist_destroy(x);
 }
 
 // fxf ==> f
