@@ -8,6 +8,10 @@ typedef struct mm_process_access_t {
   unsigned time;
 } mm_process_access_t;
 
+/**
+ * Representation of a process. It agglomerates its creation, destruction
+ * and all accesses that it'll perform during its lifetime.
+ */
 typedef struct mm_process_t {
   unsigned b;
   unsigned t0;

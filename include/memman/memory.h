@@ -3,6 +3,10 @@
 
 #include "memman/common.h"
 
+/**
+ * Representation of a memory (virtual or physical).
+ * Encapsulates a file and operations on it
+ */
 typedef struct mm_memory_t {
   mm_memory_type_e type;
   FILE* file;

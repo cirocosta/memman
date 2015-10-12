@@ -5,6 +5,9 @@
 #define MM_MAX_ACCESS 64
 #define MM_MAX_INPUT 512
 
+// in bytes
+#define MM_PAGE_SIZE 16 
+
 typedef enum mm_segment_type_e {
   MM_SEG_FREE = 1,
   MM_SEG_PROCESS,
