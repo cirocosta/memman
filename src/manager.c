@@ -14,6 +14,8 @@ void mm_manager_destroy(mm_manager_t* manager)
 {
   while (manager->process_count-- > 0)
     mm_process_destroy(manager->processes[manager->process_count]);
+  mm_memory_destroy(manager->physical);
+  mm_memory_destroy(manager->virtual);
   FREE(manager->processes);
   FREE(manager);
 }
@@ -29,6 +31,7 @@ mm_manager_t* mm_manager_parse_file(const char* fname)
   int ch;
   mm_process_t** processes = NULL;
   mm_manager_t* manager = mm_manager_create();
+  unsigned physical, virtual;
 
   PASSERT((fp = fopen(fname, "r")), "Error while opening file %s", fname);
 
@@ -46,12 +49,14 @@ mm_manager_t* mm_manager_parse_file(const char* fname)
   fgets(buf, MM_MAX_INPUT, fp);
 
   curr = buf;
-  manager->physical = strtoul(curr, &end, 10);
+  physical = strtoul(curr, &end, 10);
   ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);
+  manager->physical = mm_memory_create(physical, MM_MEM_PHYSICAL);
   curr = end;
 
-  manager->virtual = strtoul(curr, &end, 10);
+  virtual = strtoul(curr, &end, 10);
   ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);
+  manager->virtual = mm_memory_create(virtual, MM_MEM_VIRTUAL);
   curr = end;
 
   // processes' lines

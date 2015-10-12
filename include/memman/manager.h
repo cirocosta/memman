@@ -3,12 +3,11 @@
 
 #include "memman/common.h"
 #include "memman/process.h"
+#include "memman/memory.h"
 
 typedef struct mm_manager_t {
-  unsigned physical;
-  unsigned virtual;
-  /* mm_memory_t* physical; */
-  /* mm_memory_t* virtual; */
+  mm_memory_t* physical;
+  mm_memory_t* virtual;
 
   mm_algorithms_e free_mem_alg;
   mm_algorithms_e page_subst_alg;
