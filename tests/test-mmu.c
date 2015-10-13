@@ -22,6 +22,10 @@ void test1()
 
   ASSERT(mmu->pages, "");
   ASSERT(mmu->pages_count == 4, "");
+  ASSERT(mmu->pageframes_count == 2, "");
+  ASSERT(mmu->free_pageframes_count == 2, "");
+  ASSERT(mmu->free_pageframes[0] == 1, "");
+  ASSERT(mmu->free_pageframes[1] == 1, "");
 
   for (; i < mmu->pages_count; i++) {
     ASSERT(mmu->pages[0].m == 0, "");
@@ -42,11 +46,13 @@ void test2()
 {
   mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, NULL);
 
-  ASSERT(mmu->pages[0].phys_page == UINT_MAX, "");
+  ASSERT(mmu->free_pageframes_count == mmu->pageframes_count, "");
+  ASSERT(mmu->pages[0].phys_page == 0, "");
   ASSERT(mmu->pages[0].p == 0, "");
 
   mm_mmu_map(mmu, &mmu->pages[0], 3);
 
+  ASSERT(mmu->free_pageframes_count == mmu->pageframes_count - 1, "");
   ASSERT(mmu->pages[0].p == 1, "");
   ASSERT(mmu->pages[0].m == 0, "");
   ASSERT(mmu->pages[0].r == 0, "");
@@ -54,6 +60,7 @@ void test2()
 
   mm_mmu_unmap(mmu, &mmu->pages[0]);
 
+  ASSERT(mmu->free_pageframes_count == mmu->pageframes_count, "");
   ASSERT(mmu->pages[0].p == 0, "");
   ASSERT(mmu->pages[0].m == 0, "");
   ASSERT(mmu->pages[0].r == 0, "");
@@ -87,13 +94,43 @@ void test3()
   mm_mmu_destroy(mmu);
 }
 
+//  (virtual)        (physical)
+// 3  : 48-65
+// 2  : 32-47
+// 1  : 16-31       1 : 16-31
+// 0  :  0-15       0 :  0-15
+void test4()
+{
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, NULL);
+
+  // (v_page)     (p_frame)
+  //    1             0
+  //    0             1
+  ASSERT(mm_mmu_access(mmu, 16) == 0, "");
+  ASSERT(mm_mmu_access(mmu, 17) == 1, "");
+  ASSERT(mm_mmu_access(mmu, 18) == 2, "");
+
+  ASSERT(mmu->free_pageframes_count == 1, "");
+  ASSERT(mmu->free_pageframes[0] == 0, "");
+  ASSERT(mmu->free_pageframes[1] == 1, "");
+
+  ASSERT(mm_mmu_access(mmu, 0) == 16, "");
+  ASSERT(mm_mmu_access(mmu, 1) == 17, "");
+  ASSERT(mm_mmu_access(mmu, 2) == 18, "");
+
+  ASSERT(mmu->free_pageframes_count == 0, "");
+  ASSERT(mmu->free_pageframes[0] == 0, "");
+  ASSERT(mmu->free_pageframes[1] == 0, "");
+
+  mm_mmu_destroy(mmu);
+}
+
 int main()
 {
   TEST(test1, "Initialization");
   TEST(test2, "Mapping and unmapping");
   TEST(test3, "Access to mapped area");
-  // TODO
-  /* TEST(test4, "Access to unmapped area w/ phys space"); */
+  TEST(test4, "Access to unmapped area w/ phys space");
   /* TEST(test5, "Access to unmapped area w/out phys space"); */
 
   return 0;
