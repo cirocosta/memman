@@ -106,7 +106,7 @@ typedef struct mm_vpage_t {
 
 3.  Whenever the process tries to access a given memory, MMU deals with it by managing the pages as it needs to (causing page faults when necessary and using the given page replacement algorithm).
   3.1. `mm_mmu_map(base, length)`: creates a mapping in its internal table for the a given position in physical memory.
-  3.2. `mm_mmu_access(position)`
+  3.2. `mm_mmu_access(position)` tries to access the given position. If it is not present, triggers the current page replecement algorithm and then re-executes its instruction.
 
 4.  When `tf` comes, i.e, the termination time is reached, physical memory is unmapped if there are any mapping to the process' pages and the free memory management algorithm takes place again to now create a free space and completly remove the process from the virtual memory.
 
