@@ -6,7 +6,7 @@
 #define MM_MAX_INPUT 512
 
 // in bytes
-#define MM_PAGE_SIZE 16 
+#define MM_PAGE_SIZE 16
 
 typedef enum mm_segment_type_e {
   MM_SEG_FREE = 1,
@@ -24,11 +24,12 @@ typedef enum mm_algorithms_e {
   MM_ALG_FREE_QF,
 } mm_algorithms_e;
 
-  /* MM_ALG_PSUBST_FIFO, */
-  /* MM_ALG_PSUBST_LRUP, */
-  /* MM_ALG_PSUBST_NRUP, */
-  /* MM_ALG_PSUBST_SCP */
-/* } mm_algorithms_e; */
+typedef enum mm_pagesubst_algs_e {
+  MM_ALG_PSUBST_NRUP = 1,
+  MM_ALG_PSUBST_FIFO,
+  MM_ALG_PSUBST_LRUP,
+  MM_ALG_PSUBST_SCP
+} mm_pagesubst_algs_e;
 
 #define MM_ERR_MALLOC "Couldn't allocate memory"
 #define MM_ERR_MALFORMED_TRACE                                                 \

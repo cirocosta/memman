@@ -18,7 +18,7 @@ typedef struct mm_nrup_lists_t {
 
 static mm_nrup_lists_t nrup_lists = { 0 };
 
-static void mm_nrup_lists_init(unsigned pages_count)
+static inline void mm_nrup_init(unsigned pages_count)
 {
   srand(time(NULL));
   nrup_lists.class0 = calloc(pages_count, sizeof(*nrup_lists.class0));
@@ -28,13 +28,13 @@ static void mm_nrup_lists_init(unsigned pages_count)
   PASSERT(nrup_lists.class1, MM_ERR_MALLOC);
 }
 
-static void mm_nrup_lists_destroy(unsigned pages_count)
+static inline void mm_nrup_destroy(unsigned pages_count)
 {
   FREE(nrup_lists.class0);
   FREE(nrup_lists.class1);
 }
 
-mm_vpage_t* nrup(mm_vpage_t** pages, unsigned pages_count)
+static inline mm_vpage_t* mm_nrup_algorithm(mm_vpage_t* pages, unsigned pages_count)
 {
   unsigned i = 0;
   unsigned pos;
@@ -43,13 +43,13 @@ mm_vpage_t* nrup(mm_vpage_t** pages, unsigned pages_count)
   nrup_lists.class1_counter = 0;
 
   for (; i < pages_count; i++) {
-    if (!pages[i]->p)
+    if (!pages[i].p)
       continue;
 
-    if (!pages[i]->r)
-      nrup_lists.class0[nrup_lists.class0_counter++] = pages[i];
+    if (!pages[i].r)
+      nrup_lists.class0[nrup_lists.class0_counter++] = &pages[i];
     else
-      nrup_lists.class1[nrup_lists.class1_counter++] = pages[i];
+      nrup_lists.class1[nrup_lists.class1_counter++] = &pages[i];
   }
 
   if (nrup_lists.class0_counter) {
