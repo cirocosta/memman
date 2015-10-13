@@ -101,12 +101,12 @@ typedef struct mm_vpage_t {
 
 2.  Whenever a process comes, memory is assigned (mapped) to the process in the virtual memory. 
   2.1.  `mm_seglist_add_process(process)`: here is where free space management algorithms takes place. A segment is returned, representing the position in virtual memory that the process owns (with `base` and `length`)
-  2.2. `mm_mmu_map(base, length)`: let the mmu know about the presence of the process in virtual memory.
     -  All of the virtual memory that the process now owns is marked as not present in the physical memory (indicated by the `P` bit in the virtual page trable's entry).
-  2.3. `mm_memory_assign(virtual, start, end, value)` reflects the memory representation in the memory file
+  2.2. `mm_memory_assign(virtual, start, end, value)` reflects the memory representation in the memory file
 
 3.  Whenever the process tries to access a given memory, MMU deals with it by managing the pages as it needs to (causing page faults when necessary and using the given page replacement algorithm).
-  3.1. `mm_mmu_access(position)`
+  3.1. `mm_mmu_map(base, length)`: creates a mapping in its internal table for the a given position in physical memory.
+  3.2. `mm_mmu_access(position)`
 
 4.  When `tf` comes, i.e, the termination time is reached, physical memory is unmapped if there are any mapping to the process' pages and the free memory management algorithm takes place again to now create a free space and completly remove the process from the virtual memory.
 

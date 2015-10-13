@@ -1,7 +1,7 @@
 # 		--		user config
 
 CC ?= clang
-LIBS = -lpthread -lreadline
+LIBS = -lpthread -lreadline -lm
 DEFS = -D_GNU_SOURCE 
 INCLUDES = -I/usr/include -I./include
 

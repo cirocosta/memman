@@ -7,8 +7,8 @@ void test1()
 
   ASSERT(manager->physical && manager->virtual,
          "Must have created physical and virtual memories");
-  /* ASSERT(manager->physical->size == 100, ""); */
-  /* ASSERT(manager->virtual->size == 100, ""); */
+  ASSERT(manager->physical->size == 100, "");
+  ASSERT(manager->virtual->size == 100, "");
   ASSERT(manager->process_count == 4, "");
 
   ASSERT(manager->processes[0]->t0 == 0, "");
