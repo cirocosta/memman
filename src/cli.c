@@ -2,24 +2,74 @@
 
 int mm_cli_command_carrega(const char* arg, mm_simulator_t* sim) { return 0; }
 
-int mm_cli_command_show(const char* arg, mm_simulator_t* sim) { return 0; }
+int mm_cli_command_show(const char* arg, mm_simulator_t* sim)
+{
+  mm_simulator_show(sim);
+  return 0;
+}
 
 int mm_cli_command_espaco(const char* arg, mm_simulator_t* sim)
 {
-  LOGERR("executing espaco");
+  char* end = NULL;
+  unsigned alg = 0;
+  const char* ERR_MSG = "`%s` is not a valid free mem management algorithm.\n"
+                        "Valid algorithms are:\n"
+                        "  1\tFirst Fit\n"
+                        "  2\tNext Fit\n"
+                        "  3\tQuick Fit\n";
+
+  if (!arg) {
+    fprintf(stderr, ERR_MSG, NULL);
+    return 1;
+  }
+
+  alg = strtoul(arg, &end, 10);
+  if (arg == end || mm_simulator_set_free_mem_alg(sim, alg)) {
+    fprintf(stderr, ERR_MSG, arg);
+    return 1;
+  }
+
   return 0;
 }
 
 int mm_cli_command_substitui(const char* arg, mm_simulator_t* sim)
 {
-  LOGERR("executing substitui");
+  char* end = NULL;
+  unsigned alg = 0;
+  const char* ERR_MSG = "`%s` is not a valid page replacement algorithm.\n"
+                        "Valid algorithms are:\n"
+                        "  1\tNot Recently Used Page\n"
+                        "  2\tFirst-In, First-Out\n"
+                        "  3\tSecond-Chance Page\n"
+                        "  4\tLeast Recently Used Page\n";
+
+  if (arg) {
+    fprintf(stderr, ERR_MSG, NULL);
+    return 1;
+  }
+
+  alg = strtoul(arg, &end, 10);
+  if (arg == end || mm_simulator_set_page_subst_alg(sim, alg)) {
+    fprintf(stderr, ERR_MSG, arg);
+
+    return 1;
+  }
 
   return 0;
 }
 
 int mm_cli_command_executa(const char* arg, mm_simulator_t* sim)
 {
-  LOGERR("executing intervalo");
+  LOGERR("executing");
+  if (!(sim->virtual && sim->physical && sim->trace_fname)) {
+    fprintf(stderr,
+            "Trace not properly loaded.\n"
+            "Type `ajuda` if you need help configuring the simulator.\n");
+    return 1;
+  }
+
+  /* mm_simulator_simulate(sim); */
+
   return 0;
 }
 
@@ -54,8 +104,10 @@ void mm_cli_run()
 
     add_history(input);
     argv = history_tokenize(input);
-    if (!argv)
+    if (!argv) {
+      free(input);
       continue;
+    }
 
     cmd = mm_cli_search_command(argv[0]);
     if (cmd != NULL)
@@ -64,10 +116,10 @@ void mm_cli_run()
       fprintf(stderr, "Couldn't find command %s\n", argv[0]);
 
     i = 0;
-    FREE(input);
-    while (argv[i]) {
-      FREE(argv[i++]);
-    }
+    free(input);
+    while (argv[i])
+      free(argv[i++]);
+    free(argv);
   }
 
   mm_simulator_destroy(simulator);

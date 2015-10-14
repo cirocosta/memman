@@ -11,8 +11,8 @@ typedef struct mm_simulator_t {
   mm_memory_t* physical;
   mm_memory_t* virtual;
 
-  mm_algorithms_e free_mem_alg;
-  mm_algorithms_e page_subst_alg;
+  mm_algorithms_e free_mem_alg;   // for the seglist
+  mm_algorithms_e page_subst_alg; // for the mmu
 
   mm_process_t** processes; // all processes parsed
   unsigned process_count;   // # of processes parsed
@@ -26,8 +26,8 @@ static const mm_simulator_t zeroed_simulator_t = { 0 };
 mm_simulator_t* mm_simulator_create();
 void mm_simulator_destroy(mm_simulator_t*);
 
-void mm_simulator_set_free_mem_alg(mm_simulator_t* simulator, void*);
-void mm_simulator_set_page_subst_alg(mm_simulator_t* simulator, void*);
+int mm_simulator_set_free_mem_alg(mm_simulator_t* simulator, unsigned alg);
+int mm_simulator_set_page_subst_alg(mm_simulator_t* simulator, unsigned alg);
 void mm_simulator_show(mm_simulator_t* simulator);
 /* void mm_simulator_simulate(mm_simulator_t* simulator); */
 

@@ -15,7 +15,7 @@ typedef struct mm_cli_command_t {
 
 static const char* MM_CLI_PROMPT = "[mm] ";
 
-#define MM_CLI_COMMANDS_SIZE 6
+#define MM_CLI_COMMANDS_SIZE 7
 
 int mm_cli_command_carrega(const char* arg, mm_simulator_t* sim);
 int mm_cli_command_espaco(const char* arg, mm_simulator_t* sim);

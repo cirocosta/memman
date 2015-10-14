@@ -27,7 +27,41 @@ void mm_simulator_show(mm_simulator_t* simulator)
           simulator->free_mem_alg, simulator->page_subst_alg);
 }
 
-inline static char const* mm_strgets(const char* str, char* buf, size_t n)
+int mm_simulator_set_free_mem_alg(mm_simulator_t* simulator, unsigned alg)
+{
+  switch (alg) {
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    default:
+      return 1;
+  }
+
+  return 0;
+}
+
+int mm_simulator_set_page_subst_alg(mm_simulator_t* simulator, unsigned alg)
+{
+  switch (alg) {
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    case 4:
+      break;
+    default:
+      return 1;
+  }
+
+  return 0;
+}
+
+static char const* mm_strgets(const char* str, char* buf, size_t n)
 {
   char* peek = strchr(str, '\n');
 
