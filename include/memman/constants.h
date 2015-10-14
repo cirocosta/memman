@@ -1,12 +1,20 @@
 #ifndef MEMMAN__CONSTANTS_H
 #define MEMMAN__CONSTANTS_H
 
+#define BILLION 1000000000
+#define MILLION 1000000
+
 #define MM_MAX_NAME 64
 #define MM_MAX_ACCESS 64
 #define MM_MAX_INPUT 512
 
 // in bytes
 #define MM_PAGE_SIZE 16
+
+#define SIG_PROCESS_NEW SIGRTMAX - 1
+#define SIG_PROCESS_ACCESS SIGRTMAX - 2
+#define SIG_PROCESS_END SIGRTMAX - 3
+#define SIG_PROCESS_QUANTUM SIGRTMAX - 4
 
 typedef enum mm_segment_type_e {
   MM_SEG_FREE = 1,

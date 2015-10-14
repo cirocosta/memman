@@ -1,6 +1,17 @@
 #include "memman/cli.h"
 
-int mm_cli_command_carrega(const char* arg, mm_simulator_t* sim) { return 0; }
+int mm_cli_command_carrega(const char* arg, mm_simulator_t* sim) { 
+  /* mm_simulator_t* new_simulator; */
+
+  if (!arg) {
+    fprintf(stderr, "`carrega <fname>` expected a filename.\n");
+    return 1;
+  }
+
+  /* new_simulator = mm_simulator_parse_file(arg); */
+  
+  return 0; 
+}
 
 int mm_cli_command_show(const char* arg, mm_simulator_t* sim)
 {

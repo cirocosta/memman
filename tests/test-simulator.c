@@ -45,10 +45,24 @@ void test2()
   mm_simulator_destroy(simulator);
 }
 
+void test3()
+{
+  //                phys virt
+  const char* src = "32 64\n"
+                    // t0 pname tf b pn tn
+                    "0 process1 2 16 0 1\n";
+  mm_simulator_t* simulator = mm_simulator_parse(src);
+
+  mm_simulator_simulate(simulator);
+
+  mm_simulator_destroy(simulator);
+}
+
 int main(int argc, char* argv[])
 {
   TEST(test1, "Loads a file and parses it");
   TEST(test2, "parse trace from string");
+  TEST(test3, "single process simulation");
 
   return 0;
 }

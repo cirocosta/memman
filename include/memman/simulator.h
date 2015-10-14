@@ -4,6 +4,8 @@
 #include "memman/common.h"
 #include "memman/process.h"
 #include "memman/memory.h"
+#include "memman/timer.h"
+
 #include <math.h>
 
 typedef struct mm_simulator_t {
@@ -29,7 +31,7 @@ void mm_simulator_destroy(mm_simulator_t*);
 int mm_simulator_set_free_mem_alg(mm_simulator_t* simulator, unsigned alg);
 int mm_simulator_set_page_subst_alg(mm_simulator_t* simulator, unsigned alg);
 void mm_simulator_show(mm_simulator_t* simulator);
-/* void mm_simulator_simulate(mm_simulator_t* simulator); */
+void mm_simulator_simulate(mm_simulator_t* simulator);
 
 mm_simulator_t* mm_simulator_parse_file(const char* fname);
 mm_simulator_t* mm_simulator_parse(const char* src);
