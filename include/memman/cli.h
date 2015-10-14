@@ -2,10 +2,11 @@
 #define MEMMAN__CLI_H
 
 #include "memman/common.h"
+#include "memman/simulator.h"
 #include <readline/readline.h>
 #include <readline/history.h>
 
-typedef int (*mm_cli_command)(const char* argument);
+typedef int (*mm_cli_command)(const char* argument, mm_simulator_t* simulator);
 
 typedef struct mm_cli_command_t {
   char* key;
@@ -16,12 +17,13 @@ static const char* MM_CLI_PROMPT = "[mm] ";
 
 #define MM_CLI_COMMANDS_SIZE 6
 
-int mm_cli_command_carrega(const char* arg);
-int mm_cli_command_espaco(const char* arg);
-int mm_cli_command_substitui(const char* arg);
-int mm_cli_command_executa(const char* arg);
-int mm_cli_command_sai(const char* arg);
-int mm_cli_command_ajuda(const char* arg);
+int mm_cli_command_carrega(const char* arg, mm_simulator_t* sim);
+int mm_cli_command_espaco(const char* arg, mm_simulator_t* sim);
+int mm_cli_command_substitui(const char* arg, mm_simulator_t* sim);
+int mm_cli_command_executa(const char* arg, mm_simulator_t* sim);
+int mm_cli_command_sai(const char* arg, mm_simulator_t* sim);
+int mm_cli_command_ajuda(const char* arg, mm_simulator_t* sim);
+int mm_cli_command_show(const char* arg, mm_simulator_t* sim);
 
 const static char* MM_CLI_HELP =
     "Commands:\n"
@@ -30,6 +32,7 @@ const static char* MM_CLI_HELP =
     "  espaco <num>     specifies the freespace manager algorithm\n"
     "  substitui <num>  specifies the page substitution algorithm\n"
     "  executa <num>    executes the simulator printing in a `num` interval\n"
+    "  show             displays the current simulator configuration\n"
     "  sai              exits the simulator\n"
     "\n"
     "Free Space Manager Algorithms:\n"
@@ -54,6 +57,7 @@ const static mm_cli_command_t MM_CLI_COMMANDS[] = {
   { "espaco", &mm_cli_command_espaco },
   { "executa", &mm_cli_command_executa },
   { "sai", &mm_cli_command_sai },
+  { "show", &mm_cli_command_show },
   { "substitui", &mm_cli_command_substitui },
 };
 

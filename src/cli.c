@@ -1,38 +1,36 @@
 #include "memman/cli.h"
 
-int mm_cli_command_carrega(const char* arg)
-{
+int mm_cli_command_carrega(const char* arg, mm_simulator_t* sim) { return 0; }
 
-  return 0;
-}
+int mm_cli_command_show(const char* arg, mm_simulator_t* sim) { return 0; }
 
-int mm_cli_command_espaco(const char* arg)
+int mm_cli_command_espaco(const char* arg, mm_simulator_t* sim)
 {
   LOGERR("executing espaco");
   return 0;
 }
 
-int mm_cli_command_substitui(const char* arg)
+int mm_cli_command_substitui(const char* arg, mm_simulator_t* sim)
 {
   LOGERR("executing substitui");
 
   return 0;
 }
 
-int mm_cli_command_executa(const char* arg)
+int mm_cli_command_executa(const char* arg, mm_simulator_t* sim)
 {
   LOGERR("executing intervalo");
   return 0;
 }
 
-int mm_cli_command_sai(const char* arg)
+int mm_cli_command_sai(const char* arg, mm_simulator_t* sim)
 {
   fprintf(stderr, "Bye bye!\n");
   exit(0);
   return 0;
 }
 
-int mm_cli_command_ajuda(const char* arg)
+int mm_cli_command_ajuda(const char* arg, mm_simulator_t* sim)
 {
   fprintf(stderr, "%s", MM_CLI_HELP);
   return 0;
@@ -44,6 +42,7 @@ void mm_cli_run()
   char* input = NULL;
   char** argv = NULL;
   mm_cli_command cmd = NULL;
+  mm_simulator_t* simulator = mm_simulator_create();
 
   rl_bind_key('\t', rl_complete);
   fprintf(stderr, "%s", MM_CLI_WELCOME);
@@ -59,11 +58,10 @@ void mm_cli_run()
       continue;
 
     cmd = mm_cli_search_command(argv[0]);
-    if (cmd != NULL) {
-      cmd(argv[1]);
-    } else {
+    if (cmd != NULL)
+      cmd(argv[1], simulator);
+    else
       fprintf(stderr, "Couldn't find command %s\n", argv[0]);
-    }
 
     i = 0;
     FREE(input);
@@ -71,6 +69,8 @@ void mm_cli_run()
       FREE(argv[i++]);
     }
   }
+
+  mm_simulator_destroy(simulator);
 }
 
 mm_cli_command mm_cli_search_command(const char* cmd)
@@ -82,13 +82,13 @@ mm_cli_command mm_cli_search_command(const char* cmd)
 
   while (bottom <= top) {
     mid = (bottom + top) / 2;
-    if (!(res = strcmp(MM_CLI_COMMANDS[mid].key, cmd))) {
+
+    if (!(res = strcmp(MM_CLI_COMMANDS[mid].key, cmd)))
       return MM_CLI_COMMANDS[mid].command;
-    } else if (res > 0) {
+    else if (res > 0)
       top = mid - 1;
-    } else if (res < 0) {
+    else if (res < 0)
       bottom = mid + 1;
-    }
   }
 
   return NULL;
