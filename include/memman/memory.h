@@ -12,6 +12,7 @@ typedef struct mm_memory_t {
   FILE* file;
   unsigned size;
   char fname[MM_MEM_FNAME_SIZE]; 
+  unsigned char* buf;
 } mm_memory_t;
 
 mm_memory_t* mm_memory_create(unsigned size, mm_memory_type_e type);

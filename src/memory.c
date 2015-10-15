@@ -14,6 +14,8 @@ mm_memory_t* mm_memory_create(unsigned size, mm_memory_type_e type)
   mem->type = type;
   mem->size = size;
   mem->file = NULL;
+  mem->buf = calloc(mem->size, sizeof(*mem->buf));
+  PASSERT(mem->buf, MM_ERR_MALLOC);
 
   return mem;
 }
@@ -28,25 +30,22 @@ void mm_memory_destroy(mm_memory_t* mem)
 {
   if (mem->file)
     mm_memory_close(mem);
+  FREE(mem->buf);
   FREE(mem);
 }
 
 void mm_memory_init_file(mm_memory_t* mem)
 {
-  unsigned char* buf = NULL;
-
-  buf = calloc(mem->size, sizeof(*buf));
-  memset(buf, 255, mem->size);
-
-  PASSERT((mem->file = fopen(mem->fname, "wb")),
+  memset(mem->buf, 255, mem->size);
+  PASSERT((mem->file = fopen(mem->fname, "wb+")),
           "Error while opening(wb) file %s", mem->fname);
-  fwrite(buf, sizeof(*buf), mem->size, mem->file);
-
-  free(buf);
+  fwrite(mem->buf, sizeof(*mem->buf), mem->size, mem->file);
 }
 
 void mm_memory_assign(mm_memory_t* mem, unsigned base, unsigned length,
                       int value)
 {
-  // TODO
+  memset(mem->buf, value, length);
+  fseek(mem->file, base, SEEK_SET);
+  fwrite(mem->buf, sizeof(*mem->buf), length, mem->file);
 }
