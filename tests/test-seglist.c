@@ -274,18 +274,41 @@ void test9()
   mm_seglist_destroy(list);
 }
 
+void test10()
+{
+  mm_seglist_t* list = mm_seglist_create(32, MM_ALG_FREE_FF);
+
+  // initializing a process that takes 5 bytes
+  mm_process_t* process = mm_process_create();
+  process->b = 5;
+
+  mm_seglist_add_proc16(list, process);
+
+  ASSERT((list->processes->next->segment)->length == 16,
+         "Process length has the size of a page");
+  ASSERT((list->processes->next->segment)->start == 0,
+         "Process position matches");
+
+  ASSERT((list->holes->next->segment)->start == 16,
+         "Hole starts after the first process");
+  ASSERT((list->holes->next->segment)->length == 16,
+         "Hole has the expected length");
+
+  mm_seglist_destroy(list);
+}
 
 int main(int argc, char* argv[])
 {
   TEST(test1, "No processes");
-  TEST(test2, "First-Firt: first process assignment");
-  TEST(test3, "First-Firt: second process assignment");
+  TEST(test2, "First-Fit: first process assignment");
+  TEST(test3, "First-Fit: second process assignment");
   TEST(test4, "Freeing single-process");
   TEST(test5, "Freeing The first process in a 2proc scenario");
   TEST(test6, "Freeing the centered process in between other two");
   TEST(test7, "Freeing pxf");
   TEST(test8, "Freeing fxp");
   TEST(test9, "Search for a Process");
+  TEST(test2, "First proc16 assignment");
 
   return 0;
 }

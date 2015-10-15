@@ -27,4 +27,11 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* segment);
 mm_segment_t* mm_seglist_search_process(mm_seglist_t* list,
                                         mm_process_t* process);
 
+inline static mm_segment_t* mm_seglist_add_proc16(mm_seglist_t* list,
+                                                  mm_process_t* proc)
+{
+  proc->b = (((proc->b - 1) / 16 | 0) + 1) * 16;
+  return mm_seglist_add_process(list, proc);
+}
+
 #endif
