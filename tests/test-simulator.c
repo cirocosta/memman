@@ -50,7 +50,7 @@ void test3()
   //                phys virt
   const char* src = "32 64\n"
                     // t0 pname tf b pn tn
-                    "0 process1 2 16 0 1\n";
+                    "1 process2 3 16 0 1\n";
   mm_simulator_t* simulator = mm_simulator_parse(src);
 
   mm_simulator_simulate(simulator);

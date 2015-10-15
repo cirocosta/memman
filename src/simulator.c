@@ -140,13 +140,13 @@ mm_simulator_t* mm_simulator_parse_file(const char* fname)
 static void process_event_handler(siginfo_t* signal)
 {
   if (signal->si_signo == SIG_PROCESS_NEW) {
-
+    LOGERR("Process NEW!");
   } else if (signal->si_signo == SIG_PROCESS_ACCESS) {
-
+    LOGERR("Process ACCESS!");
   } else if (signal->si_signo == SIG_PROCESS_END) {
-
+    LOGERR("Process END!");
   } else if (signal->si_signo == SIG_PROCESS_QUANTUM) {
-
+    LOGERR("Process QUANTUM!");
   } else {
     fprintf(stderr, "Unexpected signal `%d`.\n", signal->si_signo);
     exit(EXIT_FAILURE);
@@ -156,19 +156,27 @@ static void process_event_handler(siginfo_t* signal)
 void mm_simulator_simulate(mm_simulator_t* simulator)
 {
   unsigned i = 0;
+  unsigned events_count = 0;
+  unsigned j;
 
   mm_timer_init();
-
   for (; i < simulator->process_count; i++) {
-    LOGERR("t0= %u", simulator->processes[i]->t0);
     mm_timer_schedule(SIG_PROCESS_NEW, simulator->processes[i]->t0,
                       simulator->processes[i]);
-    LOGERR("tf= %u", simulator->processes[i]->tf);
+    events_count++;
+    for (j = 0; j < simulator->processes[i]->access_count; j++) {
+      mm_timer_schedule(SIG_PROCESS_ACCESS,
+                        simulator->processes[i]->t0 +
+                            simulator->processes[i]->access[j].time,
+                        &simulator->processes[i]->access[j]);
+      events_count++;
+    }
     mm_timer_schedule(SIG_PROCESS_END, simulator->processes[i]->tf,
                       simulator->processes[i]);
+    events_count++;
   }
 
-  // depending on the page-subst algorithm, set the quantum timer as well
-
-  mm_timer_wait(simulator->process_count * 2, process_event_handler);
+  // TODO depending on the page-subst algorithm,
+  //      set the quantum timer as well
+  mm_timer_wait(events_count, process_event_handler);
 }
