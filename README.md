@@ -111,6 +111,20 @@ typedef struct mm_vpage_t {
 4.  When `tf` comes, i.e, the termination time is reached, physical memory is unmapped if there are any mapping to the process' pages and the free memory management algorithm takes place again to now create a free space and completly remove the process from the virtual memory.
 
 
+## Inspecting
+
+If you wish to inspect the files, use `xxd`.
+
+For example, on initialization (w/ `64B virtual mem`):
+
+```sh
+$ /tmp  xxd -g 1 mm.vir  # all 64 bytes must be 255 (in b10 - 0xff in b16)
+0000000: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+0000010: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+0000020: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+0000030: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+```
+
 # LICENSE
 
 MPLv2

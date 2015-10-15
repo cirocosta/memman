@@ -152,17 +152,20 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
   if (signal->si_signo == SIG_PROCESS_NEW) {
     unsigned j = 0;
     proc = (mm_process_t*)signal->si_ptr;
-    segment = mm_seglist_add_process(sim->segments, proc);
+    segment = mm_seglist_add_proc16(sim->segments, proc);
 
     for (; j < proc->access_count; j++) {
       proc->access[j].position += segment->start;
-      mm_timer_schedule(SIG_PROCESS_ACCESS, proc->access[j].time, &proc->access[j]);
+      mm_timer_schedule(SIG_PROCESS_ACCESS, proc->access[j].time,
+                        &proc->access[j]);
     }
   }
 
   else if (signal->si_signo == SIG_PROCESS_ACCESS) {
+    unsigned phys_pos;
+
     proc_access = (mm_process_access_t*)signal->si_ptr;
-    mm_mmu_access(sim->mmu, proc_access->position);
+    phys_pos = mm_mmu_access(sim->mmu, proc_access->position);
   }
 
   else if (signal->si_signo == SIG_PROCESS_END) {
@@ -186,6 +189,9 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
 {
   unsigned i = 0;
   unsigned events_count = 0;
+
+  mm_memory_init_file(simulator->virtual);
+  mm_memory_init_file(simulator->physical);
 
   mm_timer_init();
   for (; i < simulator->process_count; i++) {

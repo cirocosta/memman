@@ -33,10 +33,10 @@ void mm_memory_destroy(mm_memory_t* mem)
 
 void mm_memory_init_file(mm_memory_t* mem)
 {
-  int8_t* buf = NULL;
+  unsigned char* buf = NULL;
 
   buf = calloc(mem->size, sizeof(*buf));
-  memset(buf, -1, mem->size);
+  memset(buf, 255, mem->size);
 
   PASSERT((mem->file = fopen(mem->fname, "wb")),
           "Error while opening(wb) file %s", mem->fname);
