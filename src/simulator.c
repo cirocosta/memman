@@ -146,27 +146,37 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
 {
   mm_simulator_t* sim = (mm_simulator_t*)initial_data;
   mm_process_t* proc = NULL;
-  /* mm_process_access_t* proc_access = NULL; */
-
-  ASSERT(sim->virtual->size == 64, "simulator should be ok");
-  ASSERT(sim->segments != NULL, "simulator should be ok");
+  mm_segment_t* segment = NULL;
+  mm_process_access_t* proc_access = NULL;
 
   if (signal->si_signo == SIG_PROCESS_NEW) {
+    unsigned j = 0;
     proc = (mm_process_t*)signal->si_ptr;
+    segment = mm_seglist_add_process(sim->segments, proc);
 
-    ASSERT(proc->b != 0, "process has bytes set");
+    for (; j < proc->access_count; j++) {
+      proc->access[j].position += segment->start;
+      mm_timer_schedule(SIG_PROCESS_ACCESS, proc->access[j].time, &proc->access[j]);
+    }
+  }
 
-    mm_seglist_add_process(sim->segments, proc);
-  } else if (signal->si_signo == SIG_PROCESS_ACCESS) {
-    /* proc_access = (mm_process_access_t*)signal->si_ptr; */
-    // MMU
-  } else if (signal->si_signo == SIG_PROCESS_END) {
+  else if (signal->si_signo == SIG_PROCESS_ACCESS) {
+    proc_access = (mm_process_access_t*)signal->si_ptr;
+    mm_mmu_access(sim->mmu, proc_access->position);
+  }
+
+  else if (signal->si_signo == SIG_PROCESS_END) {
     proc = (mm_process_t*)signal->si_ptr;
-    mm_seglist_free_process(sim->segments,
-                            mm_seglist_search_process(sim->segments, proc));
-  } else if (signal->si_signo == SIG_PROCESS_QUANTUM) {
+    ASSERT((segment = mm_seglist_search_process(sim->segments, proc)),
+           "Process must be in segments list");
+    mm_seglist_free_process(sim->segments, segment);
+  }
+
+  else if (signal->si_signo == SIG_PROCESS_QUANTUM) {
     LOGERR("Process QUANTUM!");
-  } else {
+  }
+
+  else {
     fprintf(stderr, "Unexpected signal `%d`.\n", signal->si_signo);
     exit(EXIT_FAILURE);
   }
@@ -176,23 +186,15 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
 {
   unsigned i = 0;
   unsigned events_count = 0;
-  unsigned j;
 
   mm_timer_init();
   for (; i < simulator->process_count; i++) {
     mm_timer_schedule(SIG_PROCESS_NEW, simulator->processes[i]->t0,
                       simulator->processes[i]);
-    events_count++;
-    for (j = 0; j < simulator->processes[i]->access_count; j++) {
-      mm_timer_schedule(SIG_PROCESS_ACCESS,
-                        simulator->processes[i]->t0 +
-                            simulator->processes[i]->access[j].time,
-                        &simulator->processes[i]->access[j]);
-      events_count++;
-    }
     mm_timer_schedule(SIG_PROCESS_END, simulator->processes[i]->tf,
                       simulator->processes[i]);
-    events_count++;
+    // acesses + (new + end)
+    events_count += simulator->processes[i]->access_count + 2;
   }
 
   // TODO depending on the page-subst algorithm,

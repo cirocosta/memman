@@ -26,16 +26,18 @@ typedef struct mm_mmu_t {
   unsigned free_pageframes_count;
 } mm_mmu_t;
 
+// public
 mm_mmu_t* mm_mmu_create(unsigned vsize, unsigned psize,
                         unsigned page_frame_size,
                         mm_mmu_pr_alg replacement_alg);
 void mm_mmu_destroy(mm_mmu_t* mmu);
+unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position);
 
+// private
 void mm_mmu_map_free_pageframe(mm_mmu_t* mmu, mm_vpage_t* page);
 void mm_mmu_set_replacememt_alg(mm_mmu_t* mmu, mm_mmu_pr_alg replacement_alg);
 void mm_mmu_reset_bits(mm_mmu_t* mmu);
 void mm_mmu_map(mm_mmu_t* mmu, mm_vpage_t* vpage, unsigned phys_page);
 void mm_mmu_unmap(mm_mmu_t* mmu, mm_vpage_t* vpage);
-unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position);
 
 #endif
