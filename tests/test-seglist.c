@@ -258,6 +258,22 @@ void test8()
   mm_seglist_destroy(list);
 }
 
+void test9()
+{
+  mm_seglist_t* list = mm_seglist_create(10, MM_ALG_FREE_FF);
+  mm_process_t* process = mm_process_create();
+  mm_segment_t* proc_seg;
+  process->b = 3;
+
+  mm_seglist_add_process(list, process);
+
+  proc_seg = mm_seglist_search_process(list, process);
+
+  ASSERT(proc_seg->process->b == 3, "");
+
+  mm_seglist_destroy(list);
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -269,6 +285,7 @@ int main(int argc, char* argv[])
   TEST(test6, "Freeing the centered process in between other two");
   TEST(test7, "Freeing pxf");
   TEST(test8, "Freeing fxp");
+  TEST(test9, "Search for a Process");
 
   return 0;
 }

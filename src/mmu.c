@@ -32,9 +32,15 @@ mm_mmu_t* mm_mmu_create(unsigned vsize, unsigned psize,
   return mmu;
 }
 
+void mm_mmu_set_replacememt_alg(mm_mmu_t* mmu, mm_mmu_pr_alg replacement_alg)
+{
+  mmu->replacement_alg = replacement_alg;
+}
+
 void mm_mmu_destroy(mm_mmu_t* mmu)
 {
   FREE(mmu->pages);
+  FREE(mmu->free_pageframes);
   FREE(mmu);
 }
 

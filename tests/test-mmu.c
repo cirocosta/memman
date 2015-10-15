@@ -155,11 +155,11 @@ void test5()
 
   mm_mmu_access(mmu, 16);
   ASSERT(mmu->pages[1].p == 1, "");
-  ASSERT(mmu->pages[0].p == 0 || mmu->pages[2].p == 0,"");
+  ASSERT(mmu->pages[0].p == 0 || mmu->pages[2].p == 0, "");
 
   mm_mmu_access(mmu, 0);
-  ASSERT(mmu->pages[0].p == 1,"");
-  ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0,"");
+  ASSERT(mmu->pages[0].p == 1, "");
+  ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0, "");
 
   mm_nrup_destroy(mmu->pages_count);
   mm_mmu_destroy(mmu);

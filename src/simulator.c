@@ -12,10 +12,11 @@ mm_simulator_t* mm_simulator_create()
 
 void mm_simulator_destroy(mm_simulator_t* simulator)
 {
-  while (simulator->process_count-- > 0)
-    mm_process_destroy(simulator->processes[simulator->process_count]);
   mm_memory_destroy(simulator->physical);
   mm_memory_destroy(simulator->virtual);
+  mm_mmu_destroy(simulator->mmu);
+  mm_seglist_destroy(simulator->segments);
+
   FREE(simulator->processes);
   FREE(simulator);
 }
@@ -99,6 +100,7 @@ mm_simulator_t* mm_simulator_parse(const char* src)
   physical = strtoul(curr, &end, 10);
   ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);
   simulator->physical = mm_memory_create(physical, MM_MEM_PHYSICAL);
+  curr = end;
 
   virtual = strtoul(curr, &end, 10);
   ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);
@@ -109,6 +111,9 @@ mm_simulator_t* mm_simulator_parse(const char* src)
     processes[lines++] = mm_process_parse(buf);
   simulator->processes = processes;
   simulator->process_count = lines;
+
+  simulator->segments = mm_seglist_create(virtual, MM_ALG_FREE_FF);
+  simulator->mmu = mm_mmu_create(virtual, physical, MM_PAGE_SIZE, NULL);
 
   return simulator;
 }
@@ -137,14 +142,28 @@ mm_simulator_t* mm_simulator_parse_file(const char* fname)
   return simulator;
 }
 
-static void process_event_handler(siginfo_t* signal)
+static void process_event_handler(siginfo_t* signal, void* initial_data)
 {
+  mm_simulator_t* sim = (mm_simulator_t*)initial_data;
+  mm_process_t* proc = NULL;
+  /* mm_process_access_t* proc_access = NULL; */
+
+  ASSERT(sim->virtual->size == 64, "simulator should be ok");
+  ASSERT(sim->segments != NULL, "simulator should be ok");
+
   if (signal->si_signo == SIG_PROCESS_NEW) {
-    LOGERR("Process NEW!");
+    proc = (mm_process_t*)signal->si_ptr;
+
+    ASSERT(proc->b != 0, "process has bytes set");
+
+    mm_seglist_add_process(sim->segments, proc);
   } else if (signal->si_signo == SIG_PROCESS_ACCESS) {
-    LOGERR("Process ACCESS!");
+    /* proc_access = (mm_process_access_t*)signal->si_ptr; */
+    // MMU
   } else if (signal->si_signo == SIG_PROCESS_END) {
-    LOGERR("Process END!");
+    proc = (mm_process_t*)signal->si_ptr;
+    mm_seglist_free_process(sim->segments,
+                            mm_seglist_search_process(sim->segments, proc));
   } else if (signal->si_signo == SIG_PROCESS_QUANTUM) {
     LOGERR("Process QUANTUM!");
   } else {
@@ -178,5 +197,5 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
 
   // TODO depending on the page-subst algorithm,
   //      set the quantum timer as well
-  mm_timer_wait(events_count, process_event_handler);
+  mm_timer_wait(events_count, (void*)simulator, process_event_handler);
 }

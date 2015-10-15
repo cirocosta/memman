@@ -112,7 +112,7 @@ static void _free_pxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 static void _free_fxp(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
                       mm_dllist_t* rhs)
 {
-  lhs->segment->length += x->segment->length;  
+  lhs->segment->length += x->segment->length;
 
   mm_dllist_remove(x);
   mm_dllist_destroy(x);
@@ -153,6 +153,19 @@ static void _free_nxf(mm_seglist_t* sl, mm_dllist_t* lhs, mm_dllist_t* x,
 
   mm_dllist_remove(x);
   mm_dllist_destroy(x);
+}
+
+mm_segment_t* mm_seglist_search_process(mm_seglist_t* list,
+                                        mm_process_t* process)
+{
+  mm_dllist_t* proclist = list->processes;
+
+  while ((proclist = proclist->next)) {
+    if (proclist->segment->process == process)
+      return proclist->segment;
+  }
+
+  return NULL;
 }
 
 void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)

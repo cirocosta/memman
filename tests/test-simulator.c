@@ -17,12 +17,14 @@ void test1()
   ASSERT(simulator->processes[0]->access[0].position == 1, "");
   ASSERT(simulator->processes[0]->access[0].time == 1, "");
 
+  while (simulator->process_count --> 0) 
+    mm_process_destroy(simulator->processes[simulator->process_count]);
   mm_simulator_destroy(simulator);
 }
 
 void test2()
 {
-  const char* src = "100 100\n"
+  const char* src = "100 120\n"
                     "0 process0 2 10 1 1 2 2\n"
                     "0 process1 2 10 1 1 2 2\n"
                     "0 process2 2 10 1 1 2 2\n"
@@ -33,7 +35,7 @@ void test2()
   ASSERT(simulator->physical && simulator->virtual,
          "Must have created physical and virtual memories");
   ASSERT(simulator->physical->size == 100, "");
-  ASSERT(simulator->virtual->size == 100, "");
+  ASSERT(simulator->virtual->size == 120, "");
   ASSERT(simulator->process_count == 4, "");
 
   ASSERT(simulator->processes[0]->t0 == 0, "");
@@ -42,6 +44,8 @@ void test2()
   ASSERT(simulator->processes[0]->access[0].position == 1, "");
   ASSERT(simulator->processes[0]->access[0].time == 1, "");
 
+  while (simulator->process_count --> 0) 
+    mm_process_destroy(simulator->processes[simulator->process_count]);
   mm_simulator_destroy(simulator);
 }
 
@@ -53,6 +57,8 @@ void test3()
                     "1 process2 3 16 0 1\n";
   mm_simulator_t* simulator = mm_simulator_parse(src);
 
+  ASSERT(simulator->physical->size == 32, "");
+  ASSERT(simulator->virtual->size == 64, "");
   mm_simulator_simulate(simulator);
 
   mm_simulator_destroy(simulator);

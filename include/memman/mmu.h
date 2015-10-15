@@ -32,6 +32,7 @@ mm_mmu_t* mm_mmu_create(unsigned vsize, unsigned psize,
 void mm_mmu_destroy(mm_mmu_t* mmu);
 
 void mm_mmu_map_free_pageframe(mm_mmu_t* mmu, mm_vpage_t* page);
+void mm_mmu_set_replacememt_alg(mm_mmu_t* mmu, mm_mmu_pr_alg replacement_alg);
 void mm_mmu_reset_bits(mm_mmu_t* mmu);
 void mm_mmu_map(mm_mmu_t* mmu, mm_vpage_t* vpage, unsigned phys_page);
 void mm_mmu_unmap(mm_mmu_t* mmu, mm_vpage_t* vpage);

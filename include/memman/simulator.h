@@ -5,8 +5,14 @@
 #include "memman/process.h"
 #include "memman/memory.h"
 #include "memman/timer.h"
+#include "memman/seglist.h"
+#include "memman/mmu.h"
 
 #include <math.h>
+
+// FIXME timer_create() allocate resources.
+//       we must take care of this later.
+//       ==> timer_delete(tid)
 
 typedef struct mm_simulator_t {
   const char* trace_fname;
@@ -19,8 +25,8 @@ typedef struct mm_simulator_t {
   mm_process_t** processes; // all processes parsed
   unsigned process_count;   // # of processes parsed
 
-  /* mm_seglist_t* segments; */
-  /* mm_mmu_t* mmu; */
+  mm_seglist_t* segments; 
+  mm_mmu_t* mmu;
 } mm_simulator_t;
 
 static const mm_simulator_t zeroed_simulator_t = { 0 };

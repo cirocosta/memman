@@ -1,6 +1,22 @@
 #include "memman/timer.h"
 
-void mm_timer_schedule(int event, unsigned when, void* data)
+void mm_timer_init()
+{
+  sigset_t block_set;
+
+  // FIXME WE'RE LIMITED TO SIGNALS THAT DO NOT START AT 0
+  //       maybe use sigaction
+  if (!~sigemptyset(&block_set) || !~sigaddset(&block_set, SIG_PROCESS_NEW) ||
+      !~sigaddset(&block_set, SIG_PROCESS_ACCESS) ||
+      !~sigaddset(&block_set, SIG_PROCESS_END) ||
+      !~sigaddset(&block_set, SIG_PROCESS_QUANTUM) ||
+      !~sigprocmask(SIG_BLOCK, &block_set, NULL)) {
+    perror("error setting singnal mask:");
+    exit(EXIT_FAILURE);
+  }
+}
+
+timer_t mm_timer_schedule(int event, unsigned when, void* data)
 {
   long long nanosecs = BILLION * when;
   struct itimerspec ts;
@@ -20,26 +36,11 @@ void mm_timer_schedule(int event, unsigned when, void* data)
           "timer_create: Couldn't create timer\n");
   PASSERT(!timer_settime(tid, 0, &ts, 0),
           "timer_settime: Couldn't activate timer\n");
+
+  return tid;
 }
 
-void mm_timer_init()
-{
-  sigset_t block_set;
-
-  // FIXME WE'RE LIMITED TO SIGNALS THAT DO NOT START AT 0
-  //       maybe use sigaction
-  if (!~sigemptyset(&block_set) || !~sigaddset(&block_set, SIG_PROCESS_NEW) ||
-      !~sigaddset(&block_set, SIG_PROCESS_ACCESS) ||
-      !~sigaddset(&block_set, SIG_PROCESS_END) ||
-      !~sigaddset(&block_set, SIG_PROCESS_QUANTUM) ||
-      !~sigprocmask(SIG_BLOCK, &block_set, NULL)) {
-    perror("error setting singnal mask:");
-    exit(EXIT_FAILURE);
-  }
-
-}
-
-void mm_timer_schedule_repeating(int event, unsigned interval, void* data)
+timer_t mm_timer_schedule_repeating(int event, unsigned interval, void* data)
 {
   long long nanosecs = interval * MILLION;
   struct itimerspec ts;
@@ -59,12 +60,14 @@ void mm_timer_schedule_repeating(int event, unsigned interval, void* data)
           "timer_create: Couldn't create timer\n");
   PASSERT(!timer_settime(tid, 0, &ts, 0),
           "timer_settime: Couldn't activate timer\n");
+
+  return tid;
 }
 
-void mm_timer_wait(unsigned max_sigs, mm_timer_handler handler)
+void mm_timer_wait(unsigned max_sigs, void* data, mm_timer_handler handler)
 {
   siginfo_t sig;
-  sigset_t mask; 
+  sigset_t mask;
 
   if (!~sigemptyset(&mask) || !~sigaddset(&mask, SIG_PROCESS_NEW) ||
       !~sigaddset(&mask, SIG_PROCESS_ACCESS) ||
@@ -80,7 +83,7 @@ void mm_timer_wait(unsigned max_sigs, mm_timer_handler handler)
 
   while (max_sigs) {
     sigwaitinfo(&mask, &sig);
-    handler(&sig);
+    handler(&sig, data);
 
     if (sig.si_signo != SIG_PROCESS_QUANTUM)
       max_sigs--;
