@@ -48,4 +48,5 @@ void mm_memory_assign(mm_memory_t* mem, unsigned base, unsigned length,
   memset(mem->buf, value, length);
   fseek(mem->file, base, SEEK_SET);
   fwrite(mem->buf, sizeof(*mem->buf), length, mem->file);
+  fflush(mem->file);
 }

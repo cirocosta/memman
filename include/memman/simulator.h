@@ -27,6 +27,8 @@ typedef struct mm_simulator_t {
 
   mm_seglist_t* segments; 
   mm_mmu_t* mmu;
+
+  int8_t last_pid;
 } mm_simulator_t;
 
 static const mm_simulator_t zeroed_simulator_t = { 0 };

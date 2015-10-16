@@ -80,17 +80,17 @@ void test3()
 
   mm_mmu_map(mmu, &mmu->pages[1], 0);
 
-  ASSERT(mm_mmu_access(mmu, 16) == 0, "");
-  ASSERT(mm_mmu_access(mmu, 17) == 1, "");
-  ASSERT(mm_mmu_access(mmu, 18) == 2, "");
-  ASSERT(mm_mmu_access(mmu, 31) == 15, "");
+  ASSERT(mm_mmu_access(mmu, 16, NULL) == 0, "");
+  ASSERT(mm_mmu_access(mmu, 17, NULL) == 1, "");
+  ASSERT(mm_mmu_access(mmu, 18, NULL) == 2, "");
+  ASSERT(mm_mmu_access(mmu, 31, NULL) == 15, "");
 
   mm_mmu_unmap(mmu, &mmu->pages[1]);
   mm_mmu_map(mmu, &mmu->pages[2], 0);
 
-  ASSERT(mm_mmu_access(mmu, 32) == 0, "");
-  ASSERT(mm_mmu_access(mmu, 33) == 1, "");
-  ASSERT(mm_mmu_access(mmu, 47) == 15, "");
+  ASSERT(mm_mmu_access(mmu, 32, NULL) == 0, "");
+  ASSERT(mm_mmu_access(mmu, 33, NULL) == 1, "");
+  ASSERT(mm_mmu_access(mmu, 47, NULL) == 15, "");
 
   mm_mmu_destroy(mmu);
 }
@@ -106,17 +106,17 @@ void test4()
   // (v_page)     (p_frame)
   //    1             0
   //    0             1
-  ASSERT(mm_mmu_access(mmu, 16) == 0, "");
-  ASSERT(mm_mmu_access(mmu, 17) == 1, "");
-  ASSERT(mm_mmu_access(mmu, 18) == 2, "");
+  ASSERT(mm_mmu_access(mmu, 16, NULL) == 0, "");
+  ASSERT(mm_mmu_access(mmu, 17, NULL) == 1, "");
+  ASSERT(mm_mmu_access(mmu, 18, NULL) == 2, "");
 
   ASSERT(mmu->free_pageframes_count == 1, "");
   ASSERT(mmu->free_pageframes[0] == 0, "");
   ASSERT(mmu->free_pageframes[1] == 1, "");
 
-  ASSERT(mm_mmu_access(mmu, 0) == 16, "");
-  ASSERT(mm_mmu_access(mmu, 1) == 17, "");
-  ASSERT(mm_mmu_access(mmu, 2) == 18, "");
+  ASSERT(mm_mmu_access(mmu, 0, NULL) == 16, "");
+  ASSERT(mm_mmu_access(mmu, 1, NULL) == 17, "");
+  ASSERT(mm_mmu_access(mmu, 2, NULL) == 18, "");
 
   ASSERT(mmu->free_pageframes_count == 0, "");
   ASSERT(mmu->free_pageframes[0] == 0, "");
@@ -141,11 +141,11 @@ void test5()
   //    2             -
   //    1             0
   //    0             1
-  ASSERT(mm_mmu_access(mmu, 16) == 0, "");
-  ASSERT(mm_mmu_access(mmu, 0) == 16, "");
+  ASSERT(mm_mmu_access(mmu, 16, NULL) == 0, "");
+  ASSERT(mm_mmu_access(mmu, 0, NULL) == 16, "");
   ASSERT(mmu->free_pageframes_count == 0, "");
 
-  mm_mmu_access(mmu, 32);
+  mm_mmu_access(mmu, 32, NULL);
   ASSERT(mmu->pages[2].p == 1,
          "VPage 2 has to be in the set of those which are present in phys");
   // both vpage 1 and 2 were in the same class for the nru algorithm
@@ -153,15 +153,33 @@ void test5()
   ASSERT(mmu->pages[0].p == 0 || mmu->pages[1].p == 0,
          "Maybe vpage 1 or vpage 2 was substituted");
 
-  mm_mmu_access(mmu, 16);
+  mm_mmu_access(mmu, 16, NULL);
   ASSERT(mmu->pages[1].p == 1, "");
   ASSERT(mmu->pages[0].p == 0 || mmu->pages[2].p == 0, "");
 
-  mm_mmu_access(mmu, 0);
+  mm_mmu_access(mmu, 0, NULL);
   ASSERT(mmu->pages[0].p == 1, "");
   ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0, "");
 
   mm_nrup_destroy(mmu->pages_count);
+  mm_mmu_destroy(mmu);
+}
+
+void test6()
+{
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, NULL);
+  unsigned mb;
+
+  mm_mmu_access(mmu, 16, &mb);
+  ASSERT(mb == 0, "");
+
+  mb = 255;
+  mm_mmu_access(mmu, 17, &mb);
+  ASSERT(mb == 255, "");
+
+  mm_mmu_access(mmu, 32, &mb);
+  ASSERT(mb == 1, "");
+
   mm_mmu_destroy(mmu);
 }
 
@@ -172,6 +190,7 @@ int main()
   TEST(test3, "Access to mapped area");
   TEST(test4, "Access to unmapped area w/ phys space");
   TEST(test5, "Access to unmapped area w/out phys space");
+  TEST(test6, "Mapping notice during access");
 
   return 0;
 }

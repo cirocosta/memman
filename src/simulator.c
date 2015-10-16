@@ -151,8 +151,11 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
 
   if (signal->si_signo == SIG_PROCESS_NEW) {
     unsigned j = 0;
+
     proc = (mm_process_t*)signal->si_ptr;
+    proc->pid = sim->last_pid++;
     segment = mm_seglist_add_proc16(sim->segments, proc);
+    mm_memory_assign(sim->virtual, segment->start, segment->length, proc->pid);
 
     for (; j < proc->access_count; j++) {
       proc->access[j].position += segment->start;
@@ -163,15 +166,17 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
 
   else if (signal->si_signo == SIG_PROCESS_ACCESS) {
     unsigned phys_pos;
+    unsigned mapped_base = 0;
 
     proc_access = (mm_process_access_t*)signal->si_ptr;
-    phys_pos = mm_mmu_access(sim->mmu, proc_access->position);
+    phys_pos = mm_mmu_access(sim->mmu, proc_access->position, &mapped_base);
   }
 
   else if (signal->si_signo == SIG_PROCESS_END) {
     proc = (mm_process_t*)signal->si_ptr;
     ASSERT((segment = mm_seglist_search_process(sim->segments, proc)),
            "Process must be in segments list");
+    mm_memory_assign(sim->virtual, segment->start, segment->length, 255);
     mm_seglist_free_process(sim->segments, segment);
   }
 
@@ -185,6 +190,10 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
   }
 }
 
+static void mmu_map_cb(mm_vpage_t* vpage, void* data) {}
+
+static void mmu_unmap_cb(mm_vpage_t* vpage, void* data) {}
+
 void mm_simulator_simulate(mm_simulator_t* simulator)
 {
   unsigned i = 0;
@@ -192,6 +201,8 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
 
   mm_memory_init_file(simulator->virtual);
   mm_memory_init_file(simulator->physical);
+
+  mm_mmu_set_callbacks(simulator->mmu, mmu_map_cb, mmu_unmap_cb, NULL);
 
   mm_timer_init();
   for (; i < simulator->process_count; i++) {
