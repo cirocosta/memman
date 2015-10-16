@@ -136,10 +136,10 @@ void test5()
 
 int main(int argc, char* argv[])
 {
-  /* TEST(test1, "Loads a file and parses it"); */
-  /* TEST(test2, "parse trace from string"); */
-  /* TEST(test3, "single process simulation"); */
-  /* TEST(test4, "single process, multiple simulations"); */
+  TEST(test1, "Loads a file and parses it");
+  TEST(test2, "parse trace from string");
+  TEST(test3, "single process simulation");
+  TEST(test4, "single process, multiple simulations");
   TEST(test5, "multiple-process simulation");
 
   return 0;
