@@ -27,9 +27,12 @@ static inline mm_vpage_t* mm_fifo_algorithm(mm_mmu_t* mmu, uint8_t page)
   unsigned ppage;
 
   if (mmu->free_pageframes_count) {
-    for (unsigned i = 0; i < mmu->pageframes_count; i++)
-      if (mmu->free_pageframes[i])
+    for (unsigned i = 0; i < mmu->pageframes_count; i++) {
+      if (mmu->free_pageframes[i])  {
         ppage = mm_mmu_map(mmu, &mmu->pages[page], i);
+        break;
+      }
+    }
 
     mm_queue_insert(fifo_queue, &mmu->pages[page]);
     return &mmu->pages[page];

@@ -165,11 +165,12 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
   }
 
   else if (signal->si_signo == SIG_PROCESS_ACCESS) {
-    unsigned phys_pos;
-    unsigned mapped_base = 0;
+    /* unsigned phys_pos; */
+    /* unsigned mapped_base = 0; */
 
     proc_access = (mm_process_access_t*)signal->si_ptr;
-    phys_pos = mm_mmu_access(sim->mmu, proc_access->position, &mapped_base);
+    LOGERR("access = %u", proc_access->position);
+    /* phys_pos = mm_mmu_access(sim->mmu, proc_access->position, NULL); */
   }
 
   else if (signal->si_signo == SIG_PROCESS_END) {

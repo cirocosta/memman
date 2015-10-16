@@ -108,7 +108,6 @@ void test4()
   // (v_page)     (p_frame)
   //    1             0
   //    0             1
-  LOGERR("access = `%u`", mm_mmu_access(mmu, 16, NULL));
   ASSERT(mm_mmu_access(mmu, 16, NULL) == 0, "");
   ASSERT(mm_mmu_access(mmu, 17, NULL) == 1, "");
   ASSERT(mm_mmu_access(mmu, 18, NULL) == 2, "");
@@ -195,7 +194,6 @@ void test5()
 void test7()
 {
   mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, mm_fifo_algorithm);
-  // TODO maybe pageframe, actually?
   mm_fifo_init(mmu->pages_count);
 
   // (v_page)     (p_frame)
@@ -215,13 +213,13 @@ void test7()
   ASSERT(mmu->pages[2].p == 1,
          "VPage 2 has to be in the set of those which are present in phys");
 
-  /* mm_mmu_access(mmu, 16, NULL); */
-  /* ASSERT(mmu->pages[1].p == 1, ""); */
-  /* ASSERT(mmu->pages[0].p == 0 || mmu->pages[2].p == 0, ""); */
+  mm_mmu_access(mmu, 16, NULL);
+  ASSERT(mmu->pages[1].p == 1, "");
+  ASSERT(mmu->pages[0].p == 0 || mmu->pages[2].p == 0, "");
 
-  /* mm_mmu_access(mmu, 0, NULL); */
-  /* ASSERT(mmu->pages[0].p == 1, ""); */
-  /* ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0, ""); */
+  mm_mmu_access(mmu, 0, NULL);
+  ASSERT(mmu->pages[0].p == 1, "");
+  ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0, "");
 
   mm_fifo_destroy(mmu->pages_count);
   mm_mmu_destroy(mmu);
