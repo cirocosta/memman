@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <math.h>
 
-typedef mm_vpage_t* (*mm_mmu_pr_alg)(mm_vpage_t* pages, unsigned pages_count);
-
+struct mm_mmu_t;
+typedef mm_vpage_t* (*mm_mmu_pr_alg)(struct mm_mmu_t* mmu, uint8_t page);
 typedef void (*mm_mmu_map_cb)(mm_vpage_t*, void* data);
 
 typedef struct mm_mmu_t {
@@ -24,10 +24,6 @@ typedef struct mm_mmu_t {
   uint8_t frame_size_bits;
   uint8_t offset_mask;
 
-  mm_mmu_map_cb on_map_event;
-  mm_mmu_map_cb on_unmap_event;
-  void* cb_data;
-
   unsigned char* free_pageframes; // 0 ==> not free. 1 ==> fre
   unsigned free_pageframes_count;
 } mm_mmu_t;
@@ -36,13 +32,6 @@ typedef struct mm_mmu_t {
 mm_mmu_t* mm_mmu_create(unsigned vsize, unsigned psize,
                         unsigned page_frame_size,
                         mm_mmu_pr_alg replacement_alg);
-static inline void mm_mmu_set_callbacks(mm_mmu_t* mmu, mm_mmu_map_cb onmap,
-                                        mm_mmu_map_cb onunmap, void* data)
-{
-  mmu->cb_data = data;
-  mmu->on_map_event = onmap;
-  mmu->on_unmap_event = onunmap;
-}
 
 void mm_mmu_destroy(mm_mmu_t* mmu);
 //                          mmu           pos      value-passing mapped base

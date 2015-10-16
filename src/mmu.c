@@ -77,12 +77,17 @@ unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position, unsigned* mb)
 {
   uint8_t page = position >> mmu->offset_size_bits;
   uint8_t offset = position & mmu->offset_mask;
-  unsigned ppage;
 
   if (mmu->pages[page].p)
     return (mmu->pages[page].phys_page << mmu->offset_size_bits) + offset;
 
+  mmu->replacement_alg(mmu, page);
+
+  return mm_mmu_access(mmu, position, mb);
+
+#if 0
   if (mmu->free_pageframes_count) {
+    /* mm_fifo_onmap(&mmu->pages[page]); */
     ppage = mm_mmu_map_free_pageframe(mmu, &mmu->pages[page]);
     if (mb)
       *mb = ppage;
@@ -99,4 +104,5 @@ unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position, unsigned* mb)
     *mb = ppage;
 
   return mm_mmu_access(mmu, position, mb);
+#endif
 }

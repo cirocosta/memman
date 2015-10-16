@@ -190,10 +190,6 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
   }
 }
 
-static void mmu_map_cb(mm_vpage_t* vpage, void* data) {}
-
-static void mmu_unmap_cb(mm_vpage_t* vpage, void* data) {}
-
 void mm_simulator_simulate(mm_simulator_t* simulator)
 {
   unsigned i = 0;
@@ -201,8 +197,6 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
 
   mm_memory_init_file(simulator->virtual);
   mm_memory_init_file(simulator->physical);
-
-  mm_mmu_set_callbacks(simulator->mmu, mmu_map_cb, mmu_unmap_cb, NULL);
 
   mm_timer_init();
   for (; i < simulator->process_count; i++) {

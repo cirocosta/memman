@@ -3,6 +3,7 @@
 
 #include "memman/vpage.h"
 #include "memman/common.h"
+#include "memman/mmu.h"
 
 #include <time.h>
 #include <math.h>
@@ -34,31 +35,49 @@ static inline void mm_nrup_destroy(unsigned pages_count)
   FREE(nrup_lists.class1);
 }
 
-static inline mm_vpage_t* mm_nrup_algorithm(mm_vpage_t* pages, unsigned pages_count)
+static inline mm_vpage_t* mm_nrup_algorithm(mm_mmu_t* mmu, uint8_t page)
 {
   unsigned i = 0;
   unsigned pos;
+  unsigned ppage;
+  mm_vpage_t* subst_page;
+
+  if (mmu->free_pageframes_count) {
+    for (unsigned i = 0; i < mmu->pageframes_count; i++){ 
+      if (mmu->free_pageframes[i]) {
+        ppage = mm_mmu_map(mmu, &mmu->pages[page], i);
+        break;
+      }
+    }
+
+    return &mmu->pages[page];
+  }
 
   nrup_lists.class0_counter = 0;
   nrup_lists.class1_counter = 0;
 
-  for (; i < pages_count; i++) {
-    if (!pages[i].p)
+  for (; i < mmu->pages_count; i++) {
+    if (!mmu->pages[i].p)
       continue;
 
-    if (!pages[i].r)
-      nrup_lists.class0[nrup_lists.class0_counter++] = &pages[i];
+    if (!mmu->pages[i].r)
+      nrup_lists.class0[nrup_lists.class0_counter++] = &mmu->pages[i];
     else
-      nrup_lists.class1[nrup_lists.class1_counter++] = &pages[i];
+      nrup_lists.class1[nrup_lists.class1_counter++] = &mmu->pages[i];
   }
 
   if (nrup_lists.class0_counter) {
     pos = rand() % nrup_lists.class0_counter;
-    return nrup_lists.class0[pos];
+    subst_page = nrup_lists.class0[pos];
+  } else {
+    pos = rand() % nrup_lists.class1_counter;
+    subst_page = nrup_lists.class1[pos];
   }
 
-  pos = rand() % nrup_lists.class1_counter;
-  return nrup_lists.class1[pos];
+  ppage = mm_mmu_map(mmu, &mmu->pages[page], subst_page->phys_page);
+  mm_mmu_unmap(mmu, subst_page);
+
+  return subst_page;
 }
 
 #endif
