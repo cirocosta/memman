@@ -25,6 +25,9 @@ static inline void mm_nrup_init(mm_mmu_t* mmu)
   nrup_lists.class0 = calloc(mmu->pages_count, sizeof(*nrup_lists.class0));
   nrup_lists.class1 = calloc(mmu->pages_count, sizeof(*nrup_lists.class1));
 
+  nrup_lists.class0_counter = 0;
+  nrup_lists.class1_counter = 0;
+
   PASSERT(nrup_lists.class0, MM_ERR_MALLOC);
   PASSERT(nrup_lists.class1, MM_ERR_MALLOC);
 }

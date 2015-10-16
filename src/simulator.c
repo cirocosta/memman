@@ -44,16 +44,20 @@ int mm_simulator_set_free_mem_alg(mm_simulator_t* simulator, unsigned alg)
   return 0;
 }
 
-int mm_simulator_set_page_subst_alg(mm_simulator_t* simulator, unsigned alg)
+int mm_simulator_set_page_subst_alg(mm_simulator_t* sim, unsigned alg)
 {
   switch (alg) {
     case 1:
+      mm_mmu_set_replacememt_alg(sim->mmu, &mm_nrup_alg);
       break;
     case 2:
+      mm_mmu_set_replacememt_alg(sim->mmu, &mm_fifo_alg);
       break;
     case 3:
+      mm_mmu_set_replacememt_alg(sim->mmu, &mm_scp_alg);
       break;
     case 4:
+      fprintf(stderr, "%s\n", "LRU not implemented yet :( try another.");
       break;
     default:
       return 1;
@@ -154,6 +158,7 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
 
     proc = (mm_process_t*)signal->si_ptr;
     proc->pid = sim->last_pid++;
+
     segment = mm_seglist_add_proc16(sim->segments, proc);
     mm_memory_assign(sim->virtual, segment->start, segment->length, proc->pid);
 
@@ -165,12 +170,14 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
   }
 
   else if (signal->si_signo == SIG_PROCESS_ACCESS) {
-    /* unsigned phys_pos; */
-    /* unsigned mapped_base = 0; */
+    int mb = -1;
+    unsigned phys_pos;
 
     proc_access = (mm_process_access_t*)signal->si_ptr;
-    LOGERR("access = %u", proc_access->position);
-    /* phys_pos = mm_mmu_access(sim->mmu, proc_access->position, NULL); */
+    phys_pos = mm_mmu_access(sim->mmu, proc_access->position, &mb);
+
+    if (~mb)
+      sim->page_faults++;
   }
 
   else if (signal->si_signo == SIG_PROCESS_END) {
@@ -196,10 +203,12 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
   unsigned i = 0;
   unsigned events_count = 0;
 
+  simulator->page_faults = 0;
   mm_memory_init_file(simulator->virtual);
   mm_memory_init_file(simulator->physical);
 
   mm_timer_init();
+
   for (; i < simulator->process_count; i++) {
     mm_timer_schedule(SIG_PROCESS_NEW, simulator->processes[i]->t0,
                       simulator->processes[i]);
@@ -213,3 +222,4 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
   //      set the quantum timer as well
   mm_timer_wait(events_count, (void*)simulator, process_event_handler);
 }
+

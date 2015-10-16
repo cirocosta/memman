@@ -92,17 +92,20 @@ void mm_mmu_reset_bits(mm_mmu_t* mmu)
     mmu->pages[i].r = 0;
 }
 
-unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position, unsigned* mb)
+unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position, int* mb)
 {
   uint8_t page = position >> mmu->offset_size_bits;
   uint8_t offset = position & mmu->offset_mask;
+  unsigned ppage;
 
   if (mmu->pages[page].p) {
     mmu->pages[page].r = 1;
     return (mmu->pages[page].phys_page << mmu->offset_size_bits) + offset;
   }
 
-  mmu->pagesubst_alg->algorithm(mmu, page);
+  ppage = mmu->pagesubst_alg->algorithm(mmu, page)->phys_page;
+  if (mb)
+    *mb = ppage;
 
   return mm_mmu_access(mmu, position, mb);
 }
