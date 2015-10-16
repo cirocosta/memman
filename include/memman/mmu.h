@@ -29,7 +29,7 @@ typedef struct mm_mmu_t {
   uint8_t frame_size_bits;
   uint8_t offset_mask;
 
-  unsigned char* free_pageframes; // 0 ==> not free. 1 ==> fre
+  unsigned char* free_pageframes; // 0 ==> not free. 1 ==> free
   unsigned free_pageframes_count;
 } mm_mmu_t;
 
