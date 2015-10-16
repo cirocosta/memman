@@ -2,6 +2,7 @@
 #include "memman/mmu.h"
 #include "memman/pagesubst/nrup.h"
 #include "memman/pagesubst/fifo.h"
+#include "memman/pagesubst/scp.h"
 
 /**
  * -----------------------
@@ -102,8 +103,7 @@ void test3()
 // 0  :  0-15       0 :  0-15
 void test4()
 {
-  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, mm_nrup_algorithm);
-  mm_nrup_init(mmu->pages_count);
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, &mm_nrup_alg);
 
   // (v_page)     (p_frame)
   //    1             0
@@ -124,7 +124,6 @@ void test4()
   ASSERT(mmu->free_pageframes[0] == 0, "");
   ASSERT(mmu->free_pageframes[1] == 0, "");
 
-  mm_nrup_destroy(mmu->pages_count);
   mm_mmu_destroy(mmu);
 }
 
@@ -135,8 +134,7 @@ void test4()
 // 0  :  0-15       0 :  0-15
 void test5()
 {
-  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, mm_nrup_algorithm);
-  mm_nrup_init(mmu->pages_count);
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, &mm_nrup_alg);
 
   ASSERT(mmu->free_pageframes_count == 2, "");
 
@@ -164,7 +162,6 @@ void test5()
   ASSERT(mmu->pages[0].p == 1, "");
   ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0, "");
 
-  mm_nrup_destroy(mmu->pages_count);
   mm_mmu_destroy(mmu);
 }
 
@@ -193,8 +190,7 @@ void test5()
 // 0  :  0-15       0 :  0-15
 void test7()
 {
-  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, mm_fifo_algorithm);
-  mm_fifo_init(mmu->pages_count);
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, &mm_fifo_alg);
 
   // (v_page)     (p_frame)
   //    2             -
@@ -221,7 +217,42 @@ void test7()
   ASSERT(mmu->pages[0].p == 1, "");
   ASSERT(mmu->pages[1].p == 0 || mmu->pages[2].p == 0, "");
 
-  mm_fifo_destroy(mmu->pages_count);
+  mm_mmu_destroy(mmu);
+}
+
+void test8()
+{
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, &mm_scp_alg);
+
+  // (v_page)     (p_frame)
+  //    2             -
+  //    1             0
+  //    0             1                                           vpage:r_bit
+  ASSERT(mm_mmu_access(mmu, 16, NULL) == 0, ""); // 1st mapping (scp: 1:1)
+  ASSERT(mm_mmu_access(mmu, 0, NULL) == 16, ""); // 2nd mapping (scp: 1:1-0:1)
+  ASSERT(mmu->free_pageframes_count == 0, "");
+  mmu->pages[0].r = 0; // (scp: 1:1 - 0:0)
+
+  mm_mmu_access(mmu, 32, NULL); // 3rd mapping - page subst occurs
+                                // takes the place of 0 (instead of 1, in FIFO)
+                                // scp: 1:1-2:1
+  ASSERT(mmu->pages[0].p == 0,
+         "vpage 0 must not be present as it was considered old by r-bit");
+  ASSERT(mmu->pages[1].p == 1,
+         "vpage 1 must be present - considered new by r-bit");
+  ASSERT(mmu->pages[2].p == 1,
+         "VPage 2 has to be in as it is being currently accessed");
+
+  mm_mmu_access(mmu, 16, NULL);
+  ASSERT(mmu->pages[0].p == 0, "");
+  ASSERT(mmu->pages[1].p == 1, "");
+  ASSERT(mmu->pages[2].p == 1, "");
+
+  mm_mmu_access(mmu, 0, NULL);
+  ASSERT(mmu->pages[0].p == 1, "");
+  ASSERT(mmu->pages[1].p == 0, "");
+  ASSERT(mmu->pages[2].p == 1, "");
+
   mm_mmu_destroy(mmu);
 }
 
@@ -234,6 +265,7 @@ int main()
   TEST(test5, "nrup - Access to unmapped area w/out phys space");
   /* TEST(test6, "Mapping notice during access"); */
   TEST(test7, "fifo - Access to unmapped area w/out phys space");
+  TEST(test8, "scp - Access to unmapped area w/out phys space");
 
   return 0;
 }

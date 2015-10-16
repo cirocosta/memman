@@ -19,17 +19,17 @@ typedef struct mm_nrup_lists_t {
 
 static mm_nrup_lists_t nrup_lists = { 0 };
 
-static inline void mm_nrup_init(unsigned pages_count)
+static inline void mm_nrup_init(mm_mmu_t* mmu)
 {
   srand(time(NULL));
-  nrup_lists.class0 = calloc(pages_count, sizeof(*nrup_lists.class0));
-  nrup_lists.class1 = calloc(pages_count, sizeof(*nrup_lists.class1));
+  nrup_lists.class0 = calloc(mmu->pages_count, sizeof(*nrup_lists.class0));
+  nrup_lists.class1 = calloc(mmu->pages_count, sizeof(*nrup_lists.class1));
 
   PASSERT(nrup_lists.class0, MM_ERR_MALLOC);
   PASSERT(nrup_lists.class1, MM_ERR_MALLOC);
 }
 
-static inline void mm_nrup_destroy(unsigned pages_count)
+static inline void mm_nrup_destroy(mm_mmu_t* mmu)
 {
   FREE(nrup_lists.class0);
   FREE(nrup_lists.class1);
@@ -43,7 +43,7 @@ static inline mm_vpage_t* mm_nrup_algorithm(mm_mmu_t* mmu, uint8_t page)
   mm_vpage_t* subst_page;
 
   if (mmu->free_pageframes_count) {
-    for (unsigned i = 0; i < mmu->pageframes_count; i++){ 
+    for (unsigned i = 0; i < mmu->pageframes_count; i++) {
       if (mmu->free_pageframes[i]) {
         ppage = mm_mmu_map(mmu, &mmu->pages[page], i);
         break;
@@ -79,5 +79,11 @@ static inline mm_vpage_t* mm_nrup_algorithm(mm_mmu_t* mmu, uint8_t page)
 
   return subst_page;
 }
+
+static mm_pagesubst_alg_t mm_nrup_alg = {
+  .init = mm_nrup_init,
+  .destroy = mm_nrup_destroy,
+  .algorithm = mm_nrup_algorithm,
+};
 
 #endif
