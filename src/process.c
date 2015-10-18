@@ -43,6 +43,8 @@ mm_process_t* mm_process_parse(const char* src)
 
   // +(pn tn)
   while (*curr != '\0' && *curr != '\n') {
+    process->access[access_count].proc = process;
+
     // pn: ul
     process->access[access_count].position = strtoul(curr, &end, 10);
     ASSERT(curr != end, MM_ERR_MALFORMED_TRACE);

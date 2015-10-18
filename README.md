@@ -1,4 +1,3 @@
-
 #memman
 
 > A memory management system simulator in C
@@ -21,7 +20,7 @@
 
 ## Running
 
-You just need [make](https://www.gnu.org/software/make/) and [clang](http://clang.llvm.org/).
+You need [make](https://www.gnu.org/software/make/) and [clang](http://clang.llvm.org/) and be sure that your system provides `lreadline` (from [GNU readline](https://cnswww.cns.cwru.edu/php/chet/readline/rltop.html)) for the prompt iteration and auto-complete.
 
 ```sh
 $ make

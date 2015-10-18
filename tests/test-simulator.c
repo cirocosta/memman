@@ -1,4 +1,5 @@
 #include "memman/simulator.h"
+#include "./file-utils.h"
 
 void test1()
 {
@@ -67,7 +68,11 @@ void test3()
   mm_simulator_set_page_subst_alg(simulator, 1);
   mm_simulator_simulate(simulator);
 
-  ASSERT(simulator->page_faults > 0, "");
+  ASSERT(fhas_expected_value(simulator->physical->file, 0, 16, 0), "");
+  ASSERT(fhas_expected_value(simulator->virtual->file, 0, 16, 0), "");
+
+  ASSERT(simulator->page_faults == 1,
+         "Only a single page fault would occur - the first one");
 
   mm_simulator_destroy(simulator);
 }
@@ -136,11 +141,11 @@ void test5()
 
 int main(int argc, char* argv[])
 {
-  TEST(test1, "Loads a file and parses it");
-  TEST(test2, "parse trace from string");
+  /* TEST(test1, "Loads a file and parses it"); */
+  /* TEST(test2, "parse trace from string"); */
   TEST(test3, "single process simulation");
-  TEST(test4, "single process, multiple simulations");
-  TEST(test5, "multiple-process simulation");
+  /* TEST(test4, "single process, multiple simulations"); */
+  /* TEST(test5, "multiple-process simulation"); */
 
   return 0;
 }
