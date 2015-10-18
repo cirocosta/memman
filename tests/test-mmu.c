@@ -165,23 +165,24 @@ void test5()
   mm_mmu_destroy(mmu);
 }
 
-/* void test6() */
-/* { */
-/*   mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, NULL); */
-/*   unsigned mb; */
+void test6()
+{
+  mm_mmu_t* mmu = mm_mmu_create(64, 32, 16, &mm_nrup_alg);
+  int mb = -1;
 
-/*   mm_mmu_access(mmu, 16, &mb); */
-/*   ASSERT(mb == 0, ""); */
+  mm_mmu_access(mmu, 16, &mb);
+  ASSERT(mb == 0, "");
 
-/*   mb = 255; */
-/*   mm_mmu_access(mmu, 17, &mb); */
-/*   ASSERT(mb == 255, ""); */
+  mb = -1;
+  mm_mmu_access(mmu, 17, &mb);
+  ASSERT(mb == -1, "");
 
-/*   mm_mmu_access(mmu, 32, &mb); */
-/*   ASSERT(mb == 1, ""); */
+  mb = -1;
+  mm_mmu_access(mmu, 32, &mb);
+  ASSERT(mb == 1, "");
 
-/*   mm_mmu_destroy(mmu); */
-/* } */
+  mm_mmu_destroy(mmu);
+}
 
 //  (virtual)        (physical)
 // 3  : 48-65
@@ -263,7 +264,7 @@ int main()
   TEST(test3, "Access to mapped area");
   TEST(test4, "Access to unmapped area w/ phys space");
   TEST(test5, "nrup - Access to unmapped area w/out phys space");
-  /* TEST(test6, "Mapping notice during access"); */
+  TEST(test6, "Mapping notice during access");
   TEST(test7, "fifo - Access to unmapped area w/out phys space");
   TEST(test8, "scp - Access to unmapped area w/out phys space");
 

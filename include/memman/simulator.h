@@ -8,6 +8,10 @@
 #include "memman/seglist.h"
 #include "memman/mmu.h"
 
+#include "memman/pagesubst/nrup.h"
+#include "memman/pagesubst/fifo.h"
+#include "memman/pagesubst/scp.h"
+
 #include <math.h>
 
 // FIXME timer_create() allocate resources.
@@ -29,6 +33,7 @@ typedef struct mm_simulator_t {
   mm_mmu_t* mmu;
 
   int8_t last_pid;
+  long page_faults;
 } mm_simulator_t;
 
 static const mm_simulator_t zeroed_simulator_t = { 0 };

@@ -29,7 +29,7 @@ typedef struct mm_mmu_t {
   uint8_t frame_size_bits;
   uint8_t offset_mask;
 
-  unsigned char* free_pageframes; // 0 ==> not free. 1 ==> fre
+  unsigned char* free_pageframes; // 0 ==> not free. 1 ==> free
   unsigned free_pageframes_count;
 } mm_mmu_t;
 
@@ -40,7 +40,7 @@ mm_mmu_t* mm_mmu_create(unsigned vsize, unsigned psize,
 
 void mm_mmu_destroy(mm_mmu_t* mmu);
 //                          mmu           pos      value-passing mapped base
-unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position, unsigned* mb);
+unsigned mm_mmu_access(mm_mmu_t* mmu, unsigned position, int* mb);
 
 // private
 unsigned mm_mmu_map_free_pageframe(mm_mmu_t* mmu, mm_vpage_t* page);

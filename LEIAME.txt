@@ -1,0 +1,33 @@
+------
+memman
+  - EP2 S.O.
+  - Ciro S. Costa
+  - 8071488
+------
+
+
+Executando
+----------
+
+Para executar basta compilar o programa utilizando o `make`. É necessário que o usuário possua o compilador `clang` instalado (preferencialmente 3.6).
+
+Assim:
+  $ make
+  $ ./memman
+
+Para rodar os testes:
+  $ make clean && make test
+
+Para inspecionar os arquivos gerados (`/tmp/mm.vir` e `/tmp/mm.mem`) basta utilizar o utilitário `xxd`. Por exemplo:
+
+  $ /tmp  xxd -g 1 mm.vir  # all 64 bytes must be 255 (in b10 - 0xff in b16)
+  0000000: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+  0000010: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+  0000020: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+  0000030: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+
+Mais
+----
+
+O código pode ser obtido, atualizado, diretamente no github: https://github.com/cirocosta/memman.
+Mais informações, ver `README.md`.
