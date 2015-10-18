@@ -6,15 +6,54 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-***Table of Contents***
 
-- [Trace](#trace)
-- [Prompt](#prompt)
-- [Memory Files](#memory-files)
+- [Running](#running)
+- [Inspecting](#inspecting)
+- [Design](#design)
+  - [Trace](#trace)
+  - [Prompt](#prompt)
+  - [Memory Files](#memory-files)
+  - [MMU](#mmu)
+  - [Flow of Execution](#flow-of-execution)
+- [LICENSE](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Trace
+## Running
+
+You just need [make](https://www.gnu.org/software/make/) and [clang](http://clang.llvm.org/).
+
+```sh
+$ make
+$ ./memman
+```
+
+If you wish to test the application:
+
+```sh
+$ make && make test
+```
+
+The instructions for executing the simulator are detailed in the prompt. Type `ajuda` (pt-BR for 'help') if you need help.
+
+
+## Inspecting
+
+If you wish to inspect the files, use `xxd`.
+
+For example, on initialization (w/ `64B virtual mem`):
+
+```sh
+$ /tmp  xxd -g 1 mm.vir  # all 64 bytes must be 255 (in b10 - 0xff in b16)
+0000000: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+0000010: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+0000020: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+0000030: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
+```
+
+## Design 
+
+### Trace
 
 ```
 total_mem virtual_mem
@@ -32,7 +71,7 @@ where:
 - `b`: number of bytes utilized by the process
 - `pn tn`: position (in local memory) accessed by the process at the `tn` instant of time
 
-## Prompt 
+### Prompt 
 
 The simulator provides a prompt (`[mm] `) that lets the user insert a few commands:
 
@@ -55,7 +94,7 @@ And four page substitution algorithms:
 
 ps.: assuming that each page and page frame has a size of 16B.
 
-## Memory Files
+### Memory Files
 
 The simulator creates two binary files (each time they execute), each one simulating a type of memory. They must be initialized with their respective values as specified by the trace file - see [trace](#trace).
 
@@ -64,7 +103,7 @@ The simulator creates two binary files (each time they execute), each one simula
 
 All of its positions must be initially intialized with `-1` and later be filled with the corresponding process mem identifier (which must be unique for each process).
 
-## MMU
+### MMU
 
 The MMU is responsible for translating a given virtual addres into a physical address. It does so by mapping the virtual page into a physical page and then passing (without changes) the offset along with the mapped page frame.
 
@@ -94,7 +133,7 @@ typedef struct mm_vpage_t {
 } mm_vpage_t;
 ```
 
-## Flow of Execution
+### Flow of Execution
 
 1.  Processes come into the system as specified by the traces input file 
   1.1 `mm_manager_t` created with simulation info
@@ -111,22 +150,7 @@ typedef struct mm_vpage_t {
 4.  When `tf` comes, i.e, the termination time is reached, physical memory is unmapped if there are any mapping to the process' pages and the free memory management algorithm takes place again to now create a free space and completly remove the process from the virtual memory.
 
 
-## Inspecting
-
-If you wish to inspect the files, use `xxd`.
-
-For example, on initialization (w/ `64B virtual mem`):
-
-```sh
-$ /tmp  xxd -g 1 mm.vir  # all 64 bytes must be 255 (in b10 - 0xff in b16)
-0000000: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
-0000010: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
-0000020: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
-0000030: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  ................
-```
-
-
-# LICENSE
+## LICENSE
 
 MPLv2
 
