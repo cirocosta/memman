@@ -212,9 +212,11 @@ void mm_seglist_free_process(mm_seglist_t* list, mm_segment_t* process)
 
 mm_segment_t* mm_seglist_add_process(mm_seglist_t* list, mm_process_t* process)
 {
+  mm_segment_t* process_seg = NULL;
   mm_segment_t* free_seg = list->algorithm(list->holes->next, process->b);
   ASSERT(free_seg != NULL, "virtual memory must not be full");
-  mm_segment_t* process_seg = mm_segment_create(free_seg->start, process->b);
+
+  process_seg = mm_segment_create(free_seg->start, process->b);
   process_seg->process = process;
 
   mm_dllist_t* proc_b4 = _search_b4_start(list->processes, process_seg->start);
