@@ -3,9 +3,12 @@
 
 #include "memman/common.h"
 
+struct mm_process_t;
+
 typedef struct mm_process_access_t {
   unsigned position;
   unsigned time;
+  struct mm_process_t* proc;
 } mm_process_access_t;
 
 /**

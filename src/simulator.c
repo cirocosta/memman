@@ -176,15 +176,18 @@ static void process_event_handler(siginfo_t* signal, void* initial_data)
     proc_access = (mm_process_access_t*)signal->si_ptr;
     phys_pos = mm_mmu_access(sim->mmu, proc_access->position, &mb);
 
-    if (~mb)
+    if (~mb) {
+      mm_memory_assign(sim->physical, mb, proc_access->proc->b,
+                       proc_access->proc->pid);
       sim->page_faults++;
+    }
   }
 
   else if (signal->si_signo == SIG_PROCESS_END) {
     proc = (mm_process_t*)signal->si_ptr;
     ASSERT((segment = mm_seglist_search_process(sim->segments, proc)),
            "Process must be in segments list");
-    mm_memory_assign(sim->virtual, segment->start, segment->length, 255);
+    /* mm_memory_assign(sim->virtual, segment->start, segment->length, 255); */
     mm_seglist_free_process(sim->segments, segment);
   }
 
@@ -222,4 +225,3 @@ void mm_simulator_simulate(mm_simulator_t* simulator)
   //      set the quantum timer as well
   mm_timer_wait(events_count, (void*)simulator, process_event_handler);
 }
-
